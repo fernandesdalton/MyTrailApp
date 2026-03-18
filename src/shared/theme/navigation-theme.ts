@@ -8,7 +8,7 @@ export const lightNavigationTheme: Theme = {
     ...DefaultTheme.colors,
     primary: colors.accent,
     background: colors.background,
-    card: colors.surface,
+    card: colors.surfaceStrong,
     text: colors.text,
     border: colors.border,
     notification: colors.accent,

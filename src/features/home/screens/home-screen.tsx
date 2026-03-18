@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { type ComponentProps, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -12,10 +13,10 @@ import { AppText } from '@/shared/ui/app-text';
 type FeedIconName = ComponentProps<typeof SymbolView>['name'];
 
 const storyUsers = [
-  { id: 'you', label: 'You', color: '#6D28D9' },
-  { id: 'jake', label: 'Jake', color: '#A78BFA' },
-  { id: 'sarah', label: 'Sarah', color: '#C4B5FD' },
-  { id: 'rafa', label: 'Rafa', color: '#DDD6FE' },
+  { id: 'you', label: 'You', color: '#FF8A33' },
+  { id: 'jake', label: 'Jake', color: '#FFAA6A' },
+  { id: 'sarah', label: 'Sarah', color: '#FFB98A' },
+  { id: 'rafa', label: 'Rafa', color: '#FFD3B5' },
 ];
 
 function TopAction({
@@ -43,6 +44,11 @@ export function HomeScreen() {
   const [isComposerVisible, setIsComposerVisible] = useState(true);
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
 
+  function openNewPostScreen() {
+    setIsCreateMenuOpen(false);
+    router.push('/new-post');
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <Modal
@@ -65,7 +71,7 @@ export function HomeScreen() {
             </AppText>
 
             <View style={styles.modalActions}>
-              <Pressable style={styles.modalPrimaryAction}>
+              <Pressable onPress={openNewPostScreen} style={styles.modalPrimaryAction}>
                 <AppText style={styles.modalPrimaryIcon}>+</AppText>
                 <View style={styles.modalActionCopy}>
                   <AppText style={styles.modalPrimaryLabel}>New post</AppText>
@@ -199,7 +205,7 @@ export function HomeScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FBF7FF',
+    backgroundColor: colors.background,
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -230,7 +236,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 2,
-    borderColor: '#E9D5FF',
+    borderColor: colors.border,
   },
   brandImage: {
     width: '100%',
@@ -255,7 +261,7 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surfaceStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -277,7 +283,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     padding: 20,
   },
   modalHeader: {
@@ -310,7 +316,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     borderRadius: 22,
-    backgroundColor: '#2E1065',
+    backgroundColor: colors.accent,
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
@@ -319,14 +325,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     borderRadius: 22,
-    backgroundColor: colors.accentSoft,
+    backgroundColor: colors.surfaceStrong,
     borderWidth: 1,
     borderColor: colors.border,
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
   modalPrimaryIcon: {
-    color: '#FFFFFF',
+    color: '#130A25',
     fontSize: 24,
     lineHeight: 24,
     fontWeight: '700',
@@ -342,11 +348,11 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   modalPrimaryLabel: {
-    color: '#FFFFFF',
+    color: '#130A25',
     fontWeight: '700',
   },
   modalPrimaryHint: {
-    color: '#DDD6FE',
+    color: '#4A3729',
     fontSize: 13,
     lineHeight: 18,
   },
@@ -362,7 +368,9 @@ const styles = StyleSheet.create({
   composerCard: {
     borderRadius: 28,
     padding: 18,
-    backgroundColor: '#2E1065',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
     gap: 14,
   },
   composerTopRow: {
@@ -380,12 +388,12 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 23,
-    backgroundColor: '#6D28D9',
+    backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
   composerAvatarText: {
-    color: '#FFFFFF',
+    color: '#130A25',
     fontWeight: '700',
   },
   composerCopy: {
@@ -393,21 +401,21 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   composerTitle: {
-    color: '#FFFFFF',
+    color: colors.text,
   },
   composerSubtitle: {
-    color: '#DDD6FE',
+    color: colors.textMuted,
   },
   composerCloseButton: {
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: colors.accentSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
   composerCloseLabel: {
-    color: '#FFFFFF',
+    color: colors.accent,
     fontSize: 24,
     lineHeight: 24,
     fontWeight: '700',
@@ -417,7 +425,7 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   composerHint: {
-    color: '#DDD6FE',
+    color: colors.textMuted,
   },
   storiesContent: {
     gap: 14,
@@ -434,7 +442,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surfaceStrong,
   },
   storyCore: {
     width: 58,
@@ -466,7 +474,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     borderRadius: 999,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surfaceStrong,
     borderWidth: 1,
     borderColor: colors.border,
     paddingHorizontal: 12,

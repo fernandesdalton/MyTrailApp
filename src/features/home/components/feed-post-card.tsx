@@ -79,7 +79,11 @@ export function FeedPostCard({ post }: { post: FeedPost }) {
           />
           <FeedAction
             count={post.comments}
-            name={{ ios: 'bubble.left', android: 'chat_bubble_outline', web: 'chat_bubble_outline' }}
+            name={{
+              ios: 'bubble.left',
+              android: 'chat_bubble_outline',
+              web: 'chat_bubble_outline',
+            }}
           />
           <Pressable style={styles.routeButton}>
             <SymbolView
@@ -108,11 +112,11 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
     padding: 14,
-    shadowColor: '#2E1065',
-    shadowOpacity: 0.08,
+    shadowColor: '#000000',
+    shadowOpacity: 0.22,
     shadowRadius: 22,
     shadowOffset: { width: 0, height: 10 },
-    elevation: 2,
+    elevation: 6,
   },
   header: {
     flexDirection: 'row',
@@ -133,7 +137,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatarLabel: {
-    color: colors.text,
+    color: '#1A111F',
     fontWeight: '800',
   },
   userText: {
@@ -152,7 +156,7 @@ const styles = StyleSheet.create({
   mediaFrame: {
     overflow: 'hidden',
     borderRadius: 24,
-    backgroundColor: '#EDE9FE',
+    backgroundColor: '#231A2E',
   },
   image: {
     width: '100%',
@@ -165,17 +169,17 @@ const styles = StyleSheet.create({
     bottom: 0,
     padding: 14,
     gap: 12,
-    backgroundColor: 'rgba(17, 10, 34, 0.28)',
+    backgroundColor: 'rgba(8, 6, 11, 0.52)',
   },
   trailPill: {
     alignSelf: 'flex-start',
     borderRadius: 999,
-    backgroundColor: '#6D28D9',
+    backgroundColor: colors.accent,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
   trailPillText: {
-    color: '#FFFFFF',
+    color: '#130A25',
     fontSize: 12,
     lineHeight: 14,
     fontWeight: '800',
@@ -183,7 +187,7 @@ const styles = StyleSheet.create({
   statBar: {
     flexDirection: 'row',
     borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.93)',
+    backgroundColor: 'rgba(18, 14, 24, 0.92)',
     paddingVertical: 10,
     paddingHorizontal: 12,
     justifyContent: 'space-between',
@@ -228,6 +232,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#4A2B17',
     backgroundColor: colors.accentSoft,
     paddingHorizontal: 12,
     paddingVertical: 8,

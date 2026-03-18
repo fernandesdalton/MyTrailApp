@@ -1,15 +1,20 @@
 import { type PropsWithChildren } from 'react';
-import { StyleSheet, Text, type StyleProp, type TextStyle } from 'react-native';
+import { StyleSheet, Text, type StyleProp, type TextProps, type TextStyle } from 'react-native';
 
 import { colors } from '@/shared/theme/colors';
 
 type AppTextProps = PropsWithChildren<{
   style?: StyleProp<TextStyle>;
   variant?: 'body' | 'caption' | 'headline' | 'title';
-}>;
+}> &
+  TextProps;
 
-export function AppText({ children, style, variant = 'body' }: AppTextProps) {
-  return <Text style={[styles.base, styles[variant], style]}>{children}</Text>;
+export function AppText({ children, style, variant = 'body', ...textProps }: AppTextProps) {
+  return (
+    <Text {...textProps} style={[styles.base, styles[variant], style]}>
+      {children}
+    </Text>
+  );
 }
 
 const styles = StyleSheet.create({

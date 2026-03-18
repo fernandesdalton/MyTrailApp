@@ -1,8 +1,11 @@
 import { type FeedPost } from '@/features/home/model/feed-post.types';
+import { mapApiFeedPostToFeedPost } from '@/features/posts/model/post.mappers';
+import { type ApiFeedPost } from '@/features/posts/model/post.types';
+import { apiGet } from '@/shared/lib/api/api-client';
 
 const feedPosts: FeedPost[] = [
   {
-    id: 'dusty-loop',
+    id: '99999999-9999-4999-8999-999999999999',
     userName: 'Jake "Dusty" Miller',
     handle: '@jake.dusty',
     postedAt: '2h ago',
@@ -19,7 +22,7 @@ const feedPosts: FeedPost[] = [
     avatarColor: '#C4B5FD',
   },
   {
-    id: 'silver-king',
+    id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     userName: 'Sarah Moto',
     handle: '@sarahmoto',
     postedAt: '5h ago',
@@ -36,7 +39,7 @@ const feedPosts: FeedPost[] = [
     avatarColor: '#DDD6FE',
   },
   {
-    id: 'violet-ridge',
+    id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
     userName: 'Rafa Ventura',
     handle: '@rafa.ventura',
     postedAt: 'Yesterday',
@@ -55,5 +58,10 @@ const feedPosts: FeedPost[] = [
 ];
 
 export async function getFeedPosts() {
-  return feedPosts;
+  try {
+    const apiFeedPosts = await apiGet<ApiFeedPost[]>('/feed');
+    return apiFeedPosts.map(mapApiFeedPostToFeedPost);
+  } catch {
+    return feedPosts;
+  }
 }
