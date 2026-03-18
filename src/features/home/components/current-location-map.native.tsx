@@ -1,8 +1,8 @@
-import Mapbox, { Camera, LocationPuck, MapView, UserTrackingMode } from '@rnmapbox/maps';
 import Constants from 'expo-constants';
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import type MapboxModuleType from '@rnmapbox/maps';
 
 import {
   currentLocationMapStyles as styles,
@@ -13,6 +13,7 @@ import { AppText } from '@/shared/ui/app-text';
 
 const defaultCoordinate: [number, number] = [-46.6333, -23.5505];
 const mapboxAccessToken = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN ?? '';
+const mapbox = safeRequireMapbox();
 
 type LocationState = {
   latitude: number;
@@ -25,6 +26,14 @@ function formatCoordinate(value: number) {
   return value.toFixed(5);
 }
 
+function safeRequireMapbox(): typeof MapboxModuleType | null {
+  try {
+    return require('@rnmapbox/maps').default as typeof MapboxModuleType;
+  } catch {
+    return null;
+  }
+}
+
 export function CurrentLocationMap() {
   const [permission, setPermission] = useState<PermissionState>('checking');
   const [location, setLocation] = useState<LocationState | null>(null);
@@ -32,8 +41,8 @@ export function CurrentLocationMap() {
   const isExpoGo = Constants.appOwnership === 'expo';
 
   useEffect(() => {
-    if (mapboxAccessToken) {
-      void Mapbox.setAccessToken(mapboxAccessToken);
+    if (mapboxAccessToken && mapbox) {
+      void mapbox.setAccessToken(mapboxAccessToken);
     }
   }, []);
 
@@ -86,6 +95,16 @@ export function CurrentLocationMap() {
     );
   }
 
+  if (!mapbox) {
+    return (
+      <MapNoticeCard
+        title="Rebuild the native app"
+        description="Mapbox was added to the project, but the Android/iOS app binary you launched does not include the native Mapbox module yet."
+        footerText="Create a fresh development build after installing the package, then open the app from that new build."
+      />
+    );
+  }
+
   if (permission === 'denied') {
     return (
       <MapNoticeCard
@@ -96,6 +115,8 @@ export function CurrentLocationMap() {
       />
     );
   }
+
+  const { Camera, LocationPuck, MapView, StyleURL, UserTrackingMode } = mapbox;
 
   return (
     <View style={styles.wrapper}>
@@ -116,7 +137,7 @@ export function CurrentLocationMap() {
       <View style={styles.mapCard}>
         <MapView
           style={StyleSheet.absoluteFill}
-          styleURL={Mapbox.StyleURL.Light}
+          styleURL={StyleURL.Light}
           logoEnabled={false}
           scaleBarEnabled={false}
           compassEnabled
