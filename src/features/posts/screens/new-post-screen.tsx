@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useAuthSession } from '@/features/auth/hooks/use-auth-session';
 import { localMockUser } from '@/features/posts/constants/mock-user';
 import { useCreatePostMutation } from '@/features/posts/mutations/use-create-post-mutation';
 import { type MediaAsset, type PostVisibility } from '@/features/posts/model/post.types';
@@ -39,6 +40,7 @@ const visibilityOptions: {
 ];
 
 export function NewPostScreen() {
+  const { session } = useAuthSession();
   const { data, isLoading } = usePostComposerDataQuery();
   const createPostMutation = useCreatePostMutation();
   const [caption, setCaption] = useState('');
@@ -49,9 +51,9 @@ export function NewPostScreen() {
 
   useEffect(() => {
     if (!selectedAuthorId) {
-      setSelectedAuthorId(data?.users[0]?.id ?? localMockUser.id);
+      setSelectedAuthorId(session?.user.id ?? data?.users[0]?.id ?? localMockUser.id);
     }
-  }, [data?.users, selectedAuthorId]);
+  }, [data?.users, selectedAuthorId, session?.user.id]);
 
   useEffect(() => {
     if (!data?.trails.length || selectedTrailId) {
@@ -63,7 +65,16 @@ export function NewPostScreen() {
 
   const selectedAuthor =
     data?.users.find((user) => user.id === selectedAuthorId) ??
-    (selectedAuthorId === localMockUser.id ? localMockUser : null);
+    (selectedAuthorId === session?.user.id
+      ? {
+          id: session.user.id,
+          username: session.user.username,
+          displayName: session.user.displayName,
+          avatarUrl: session.user.avatarUrl ?? null,
+        }
+      : selectedAuthorId === localMockUser.id
+        ? localMockUser
+        : null);
   const selectedTrail = data?.trails.find((trail) => trail.id === selectedTrailId) ?? null;
   const trailCount = data?.trails.length ?? 0;
 
@@ -124,13 +135,13 @@ export function NewPostScreen() {
 
       await createPostMutation.mutateAsync({
         payload: {
-          authorId: '11111111-1111-4111-8111-111111111111',
-          trailId: selectedTrail?.id ?? '22222222-2222-4222-8222-222222222222',
+          authorId: selectedAuthor.id,
+          trailId: selectedTrail?.id ?? null,
           caption: caption.trim() || 'Cloud inversion this morning.',
           visibility,
           media: [payloadMedia],
         },
-        author: localMockUser,
+        author: selectedAuthor,
         trail: selectedTrail,
       });
 

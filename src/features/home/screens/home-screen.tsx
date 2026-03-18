@@ -5,19 +5,14 @@ import { type ComponentProps, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useAuthSession } from '@/features/auth/hooks/use-auth-session';
 import { FeedPostCard } from '@/features/home/components/feed-post-card';
+import { useHomeStoriesQuery } from '@/features/home/queries/use-home-stories-query';
 import { useFeedPostsQuery } from '@/features/home/queries/use-feed-posts-query';
 import { colors } from '@/shared/theme/colors';
 import { AppText } from '@/shared/ui/app-text';
 
 type FeedIconName = ComponentProps<typeof SymbolView>['name'];
-
-const storyUsers = [
-  { id: 'you', label: 'You', color: '#FF8A33' },
-  { id: 'jake', label: 'Jake', color: '#FFAA6A' },
-  { id: 'sarah', label: 'Sarah', color: '#FFB98A' },
-  { id: 'rafa', label: 'Rafa', color: '#FFD3B5' },
-];
 
 function TopAction({
   name,
@@ -40,7 +35,9 @@ function TopAction({
 }
 
 export function HomeScreen() {
+  const { session, signOut } = useAuthSession();
   const { data } = useFeedPostsQuery();
+  const { data: stories } = useHomeStoriesQuery();
   const [isComposerVisible, setIsComposerVisible] = useState(true);
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
 
@@ -122,6 +119,9 @@ export function HomeScreen() {
               <TopAction
                 name={{ ios: 'paperplane', android: 'near_me', web: 'near_me' }}
               />
+              <Pressable onPress={() => void signOut()} style={styles.topAction}>
+                <AppText style={styles.topActionLogout}>x</AppText>
+              </Pressable>
             </View>
           </View>
 
@@ -130,7 +130,9 @@ export function HomeScreen() {
               <View style={styles.composerTopRow}>
                 <View style={styles.composerHeader}>
                   <View style={styles.composerAvatar}>
-                    <AppText style={styles.composerAvatarText}>D</AppText>
+                    <AppText style={styles.composerAvatarText}>
+                      {session?.user.displayName?.charAt(0).toUpperCase() ?? 'R'}
+                    </AppText>
                   </View>
                   <View style={styles.composerCopy}>
                     <AppText variant="title" style={styles.composerTitle}>
@@ -160,7 +162,7 @@ export function HomeScreen() {
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.storiesContent}>
-            {storyUsers.map((story) => (
+            {stories?.map((story) => (
               <View key={story.id} style={styles.storyItem}>
                 <View style={[styles.storyRing, { borderColor: story.color }]}>
                   <View style={[styles.storyCore, { backgroundColor: story.color }]}>
@@ -270,6 +272,13 @@ const styles = StyleSheet.create({
     fontSize: 22,
     lineHeight: 22,
     fontWeight: '700',
+    textAlign: 'center',
+  },
+  topActionLogout: {
+    color: colors.accent,
+    fontSize: 18,
+    lineHeight: 18,
+    fontWeight: '800',
     textAlign: 'center',
   },
   modalBackdrop: {

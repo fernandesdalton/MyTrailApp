@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { fireEvent, render } from '@testing-library/react-native';
 import * as Location from 'expo-location';
 
+import { useAuthSession } from '@/features/auth/hooks/use-auth-session';
 import { FeedPostCard } from '@/features/home/components/feed-post-card';
 import { CurrentLocationMap as CurrentLocationMapNative } from '@/features/home/components/current-location-map.native';
 import { MapNoticeCard } from '@/features/home/components/current-location-map.shared';
@@ -32,6 +33,19 @@ jest.mock('@/features/home/queries/use-feed-posts-query', () => ({
   })),
 }));
 
+jest.mock('@/features/home/queries/use-home-stories-query', () => ({
+  useHomeStoriesQuery: jest.fn(() => ({
+    data: [
+      { id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', label: 'You', color: '#FF8A33' },
+      { id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd', label: 'Jake', color: '#FFAA6A' },
+    ],
+  })),
+}));
+
+jest.mock('@/features/auth/hooks/use-auth-session', () => ({
+  useAuthSession: jest.fn(),
+}));
+
 const samplePost: FeedPost = {
   id: '99999999-9999-4999-8999-999999999999',
   userName: 'Jake',
@@ -51,9 +65,21 @@ const samplePost: FeedPost = {
 const mockedRouter = router as unknown as {
   push: jest.Mock;
 };
+const mockedUseAuthSession = useAuthSession as jest.Mock;
 
 describe('home components and screen', () => {
   beforeEach(() => {
+    mockedUseAuthSession.mockReturnValue({
+      session: {
+        user: {
+          id: '11111111-1111-4111-8111-111111111111',
+          email: 'alex@trailblazer.app',
+          username: 'alex',
+          displayName: 'Alex',
+        },
+      },
+      signOut: jest.fn(),
+    });
     (Location.requestForegroundPermissionsAsync as jest.Mock).mockImplementation(
       () => new Promise(() => undefined)
     );
@@ -92,8 +118,9 @@ describe('home components and screen', () => {
     expect(getByText('TrailBlazer')).toBeTruthy();
     expect(getByText('Trail feed')).toBeTruthy();
     expect(getByText("Share today's trail")).toBeTruthy();
+    expect(getByText('You')).toBeTruthy();
 
-    fireEvent.press(getAllByText('x')[0]!);
+    fireEvent.press(getAllByText('x')[1]!);
     expect(queryByText("Share today's trail")).toBeNull();
 
     fireEvent.press(getByText('+'));

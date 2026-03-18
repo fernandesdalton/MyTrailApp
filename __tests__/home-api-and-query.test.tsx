@@ -6,6 +6,7 @@ import React from 'react';
 import { Text } from 'react-native';
 
 import { getFeedPosts } from '@/features/home/api/get-feed-posts';
+import { getHomeStories } from '@/features/home/api/get-home-stories';
 import { useFeedPostsQuery } from '@/features/home/queries/use-feed-posts-query';
 
 jest.mock('@/shared/lib/api/api-client', () => ({
@@ -66,6 +67,33 @@ describe('home feed api and query', () => {
     const posts = await getFeedPosts();
     expect(posts).toHaveLength(3);
     expect(posts[0]?.trailName).toBeTruthy();
+  });
+
+  it('returns story feed data when request succeeds', async () => {
+    apiGetMock.mockResolvedValue([
+      {
+        id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+        author: {
+          id: '11111111-1111-4111-8111-111111111111',
+          displayName: 'Dusty Rider',
+        },
+      },
+    ]);
+
+    await expect(getHomeStories()).resolves.toEqual([
+      {
+        id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+        label: 'Dusty Rider',
+        color: expect.any(String),
+      },
+    ]);
+  });
+
+  it('falls back to local stories when story request fails', async () => {
+    apiGetMock.mockRejectedValue(new Error('offline'));
+    const stories = await getHomeStories();
+    expect(stories).toHaveLength(4);
+    expect(stories[0]?.label).toBeTruthy();
   });
 
   it('runs the feed query hook successfully', async () => {

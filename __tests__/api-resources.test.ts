@@ -35,7 +35,7 @@ describe('api resources', () => {
     expect(postsApi.getById('p1')).toEqual({ method: 'GET', path: '/posts/p1' });
     expect(commentsApi.listByPost('p1')).toEqual({ method: 'GET', path: '/posts/p1/comments' });
     expect(commentsApi.getById('c1')).toEqual({ method: 'GET', path: '/comments/c1' });
-    expect(storiesApi.list()).toEqual({ method: 'GET', path: '/stories/all' });
+    expect(storiesApi.list()).toEqual({ method: 'GET', path: '/stories' });
     expect(storiesApi.getById('s1')).toEqual({ method: 'GET', path: '/stories/s1' });
   });
 

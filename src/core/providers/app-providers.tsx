@@ -6,6 +6,7 @@ import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AuthProvider } from '@/features/auth/providers/auth-provider';
 import { queryClient } from '@/shared/lib/react-query/query-client';
 import { darkNavigationTheme, lightNavigationTheme } from '@/shared/theme/navigation-theme';
 
@@ -17,10 +18,12 @@ export function AppProviders({ children }: PropsWithChildren) {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider value={isDark ? darkNavigationTheme : lightNavigationTheme}>
-            <StatusBar style={isDark ? 'light' : 'dark'} />
-            {children}
-          </ThemeProvider>
+          <AuthProvider>
+            <ThemeProvider value={isDark ? darkNavigationTheme : lightNavigationTheme}>
+              <StatusBar style={isDark ? 'light' : 'dark'} />
+              {children}
+            </ThemeProvider>
+          </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

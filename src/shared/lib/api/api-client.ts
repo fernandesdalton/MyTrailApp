@@ -1,3 +1,4 @@
+import { getCachedAccessToken } from '@/features/auth/lib/auth-session';
 import { buildApiUrl } from '@/shared/lib/api/api-config';
 
 type ApiRequestOptions = Omit<RequestInit, 'body'> & {
@@ -62,6 +63,12 @@ function normalizeBody(body: ApiRequestOptions['body'], headers: Headers) {
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}) {
   const url = buildApiUrl(path);
   const headers = new Headers(options.headers);
+  const accessToken = getCachedAccessToken();
+
+  if (accessToken && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${accessToken}`);
+  }
+
   let response: Response;
 
   try {

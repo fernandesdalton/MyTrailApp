@@ -4,9 +4,14 @@ import { router } from 'expo-router';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 
 import { NewPostScreen } from '@/features/posts/screens/new-post-screen';
+import { useAuthSession } from '@/features/auth/hooks/use-auth-session';
 import { mapApiFeedPostToFeedPost, mapCreatedPostToFeedPost } from '@/features/posts/model/post.mappers';
 import { useCreatePostMutation } from '@/features/posts/mutations/use-create-post-mutation';
 import { usePostComposerDataQuery } from '@/features/posts/queries/use-post-composer-data-query';
+
+jest.mock('@/features/auth/hooks/use-auth-session', () => ({
+  useAuthSession: jest.fn(),
+}));
 
 jest.mock('@/features/posts/queries/use-post-composer-data-query', () => ({
   usePostComposerDataQuery: jest.fn(),
@@ -18,6 +23,7 @@ jest.mock('@/features/posts/mutations/use-create-post-mutation', () => ({
 
 const mockedUsePostComposerDataQuery = usePostComposerDataQuery as jest.Mock;
 const mockedUseCreatePostMutation = useCreatePostMutation as jest.Mock;
+const mockedUseAuthSession = useAuthSession as jest.Mock;
 const mockedRouter = router as unknown as {
   back: jest.Mock;
   replace: jest.Mock;
@@ -25,13 +31,26 @@ const mockedRouter = router as unknown as {
 
 describe('post creation', () => {
   beforeEach(() => {
+    mockedUseAuthSession.mockReturnValue({
+      session: {
+        user: {
+          id: '11111111-1111-4111-8111-111111111111',
+          email: 'alex@trailblazer.app',
+          username: 'alex',
+          displayName: 'Alex',
+          avatarUrl: null,
+        },
+      },
+      status: 'authenticated',
+    });
+
     mockedUsePostComposerDataQuery.mockReturnValue({
       data: {
         users: [
           {
             id: '11111111-1111-4111-8111-111111111111',
-            username: 'dusty',
-            displayName: 'Dusty Rider',
+            username: 'alex',
+            displayName: 'Alex',
           },
         ],
         trails: [
@@ -104,7 +123,6 @@ describe('post creation', () => {
           id: '11111111-1111-4111-8111-111111111111',
           username: 'alex',
           displayName: 'Alex',
-          avatarUrl: null,
         },
         trail: {
           id: '22222222-2222-4222-8222-222222222222',
@@ -194,8 +212,8 @@ describe('post creation', () => {
         users: [
           {
             id: '11111111-1111-4111-8111-111111111111',
-            username: 'dusty',
-            displayName: 'Dusty Rider',
+            username: 'alex',
+            displayName: 'Alex',
           },
         ],
         trails: [

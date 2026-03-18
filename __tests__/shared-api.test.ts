@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
+import { setCachedSession } from '@/features/auth/lib/auth-session';
 import { apiConfig, buildApiUrl } from '@/shared/lib/api/api-config';
 import {
   ApiError,
@@ -26,6 +27,7 @@ describe('api-config', () => {
 describe('api-client', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    setCachedSession(null);
   });
 
   it('builds query strings correctly', () => {
@@ -91,5 +93,41 @@ describe('api-client', () => {
     });
 
     await expect(apiRequest('/boom')).rejects.toBeInstanceOf(ApiError);
+  });
+
+  it('attaches bearer auth when a session token is cached', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      headers: { get: () => 'application/json' },
+      json: async () => ({ ok: true }),
+      text: async () => '',
+    });
+
+    setCachedSession({
+      accessToken: 'atk_test',
+      refreshToken: 'rtk_test',
+      expiresAt: new Date().toISOString(),
+      provider: 'password',
+      user: {
+        id: '11111111-1111-4111-8111-111111111111',
+        email: 'alex@trailblazer.app',
+        username: 'alex',
+        displayName: 'Alex',
+      },
+    });
+
+    await apiGet('/users');
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      'http://127.0.0.1:8000/api/v1/users',
+      expect.objectContaining({
+        method: 'GET',
+        headers: expect.any(Headers),
+      })
+    );
+
+    const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    const headers = init.headers as Headers;
+    expect(headers.get('Authorization')).toBe('Bearer atk_test');
   });
 });

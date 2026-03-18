@@ -1,7 +1,8 @@
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { type ComponentProps } from 'react';
 
+import { useAuthSession } from '@/features/auth/hooks/use-auth-session';
 import { colors } from '@/shared/theme/colors';
 
 type TabBarIconProps = {
@@ -15,6 +16,16 @@ function TabBarIcon({ color, focused, name }: TabBarIconProps) {
 }
 
 export default function TabsLayout() {
+  const { status } = useAuthSession();
+
+  if (status === 'loading') {
+    return null;
+  }
+
+  if (status !== 'authenticated') {
+    return <Redirect href="/(auth)/login" />;
+  }
+
   return (
     <Tabs
       screenOptions={{
