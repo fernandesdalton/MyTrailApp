@@ -1,0 +1,329 @@
+{
+  "overview": {
+    "description": "Core social trail app data model for users, posts, trails, stories, and the API payloads that support the mobile feed.",
+    "mainRelationships": [
+      "User 1:N Post",
+      "User 1:N Trail",
+      "User 1:N Story",
+      "Trail 1:N Post (optional on post)",
+      "Trail 1:N Story (optional on story)",
+      "User N:N User through Follow",
+      "User N:N Post through PostLike",
+      "User N:N Trail through SavedTrail",
+      "User N:N Story through StoryView",
+      "Post 1:N Comment"
+    ]
+  },
+  "models": {
+    "User": {
+      "id": "string",
+      "username": "string",
+      "displayName": "string",
+      "bio": "string|null",
+      "avatarUrl": "string|null",
+      "locationLabel": "string|null",
+      "createdAt": "ISODate",
+      "updatedAt": "ISODate"
+    },
+    "Trail": {
+      "id": "string",
+      "ownerId": "string",
+      "title": "string",
+      "slug": "string",
+      "description": "string|null",
+      "coverImageUrl": "string|null",
+      "distanceMeters": "number",
+      "durationSeconds": "number",
+      "elevationGainMeters": "number",
+      "routePath": [
+        {
+          "latitude": "number",
+          "longitude": "number"
+        }
+      ],
+      "startPoint": {
+        "latitude": "number",
+        "longitude": "number"
+      },
+      "endPoint": {
+        "latitude": "number",
+        "longitude": "number"
+      },
+      "regionLabel": "string|null",
+      "visibility": "public|followers|private",
+      "createdAt": "ISODate",
+      "updatedAt": "ISODate"
+    },
+    "MediaAsset": {
+      "id": "string",
+      "type": "image|video",
+      "url": "string",
+      "width": "number",
+      "height": "number",
+      "blurhash": "string|null"
+    },
+    "Post": {
+      "id": "string",
+      "authorId": "string",
+      "trailId": "string|null",
+      "caption": "string|null",
+      "media": [
+        {
+          "$ref": "MediaAsset"
+        }
+      ],
+      "likesCount": "number",
+      "commentsCount": "number",
+      "visibility": "public|followers|private",
+      "createdAt": "ISODate",
+      "updatedAt": "ISODate"
+    },
+    "Story": {
+      "id": "string",
+      "authorId": "string",
+      "trailId": "string|null",
+      "media": {
+        "$ref": "MediaAsset"
+      },
+      "caption": "string|null",
+      "expiresAt": "ISODate",
+      "createdAt": "ISODate"
+    },
+    "Follow": {
+      "followerId": "string",
+      "followingId": "string",
+      "createdAt": "ISODate"
+    },
+    "PostLike": {
+      "postId": "string",
+      "userId": "string",
+      "createdAt": "ISODate"
+    },
+    "StoryView": {
+      "storyId": "string",
+      "viewerId": "string",
+      "viewedAt": "ISODate"
+    },
+    "SavedTrail": {
+      "userId": "string",
+      "trailId": "string",
+      "createdAt": "ISODate"
+    },
+    "Comment": {
+      "id": "string",
+      "postId": "string",
+      "authorId": "string",
+      "body": "string",
+      "createdAt": "ISODate",
+      "updatedAt": "ISODate"
+    }
+  },
+  "feedPayloads": {
+    "FeedPost": {
+      "id": "string",
+      "caption": "string|null",
+      "createdAt": "ISODate",
+      "media": [
+        {
+          "$ref": "MediaAsset"
+        }
+      ],
+      "likesCount": "number",
+      "commentsCount": "number",
+      "isLiked": "boolean",
+      "author": {
+        "id": "string",
+        "username": "string",
+        "displayName": "string",
+        "avatarUrl": "string|null"
+      },
+      "trail": {
+        "id": "string",
+        "title": "string",
+        "distanceMeters": "number",
+        "durationSeconds": "number",
+        "elevationGainMeters": "number",
+        "regionLabel": "string|null"
+      }
+    },
+    "FeedStory": {
+      "id": "string",
+      "createdAt": "ISODate",
+      "expiresAt": "ISODate",
+      "caption": "string|null",
+      "media": {
+        "$ref": "MediaAsset"
+      },
+      "seen": "boolean",
+      "author": {
+        "id": "string",
+        "username": "string",
+        "displayName": "string",
+        "avatarUrl": "string|null"
+      },
+      "trail": {
+        "id": "string",
+        "title": "string"
+      }
+    }
+  },
+  "api": {
+    "endpoints": [
+      {
+        "method": "GET",
+        "path": "/feed"
+      },
+      {
+        "method": "GET",
+        "path": "/stories"
+      },
+      {
+        "method": "GET",
+        "path": "/users/:userId"
+      },
+      {
+        "method": "GET",
+        "path": "/users/:userId/posts"
+      },
+      {
+        "method": "GET",
+        "path": "/users/:userId/trails"
+      },
+      {
+        "method": "GET",
+        "path": "/trails"
+      },
+      {
+        "method": "GET",
+        "path": "/trails/:trailId"
+      },
+      {
+        "method": "GET",
+        "path": "/posts/:postId"
+      },
+      {
+        "method": "GET",
+        "path": "/posts/:postId/comments"
+      },
+      {
+        "method": "POST",
+        "path": "/posts"
+      },
+      {
+        "method": "POST",
+        "path": "/trails"
+      },
+      {
+        "method": "POST",
+        "path": "/stories"
+      },
+      {
+        "method": "POST",
+        "path": "/posts/:postId/likes"
+      },
+      {
+        "method": "DELETE",
+        "path": "/posts/:postId/likes"
+      },
+      {
+        "method": "POST",
+        "path": "/users/:userId/follow"
+      },
+      {
+        "method": "DELETE",
+        "path": "/users/:userId/follow"
+      },
+      {
+        "method": "POST",
+        "path": "/trails/:trailId/save"
+      },
+      {
+        "method": "DELETE",
+        "path": "/trails/:trailId/save"
+      }
+    ],
+    "recommendedInitialContracts": [
+      {
+        "method": "GET",
+        "path": "/feed"
+      },
+      {
+        "method": "GET",
+        "path": "/stories"
+      },
+      {
+        "method": "GET",
+        "path": "/trails/:trailId"
+      },
+      {
+        "method": "POST",
+        "path": "/posts"
+      }
+    ]
+  },
+  "database": {
+    "tables": {
+      "users": {
+        "id": "uuid pk",
+        "username": "text unique not null",
+        "display_name": "text not null",
+        "bio": "text",
+        "avatar_url": "text",
+        "location_label": "text",
+        "created_at": "timestamptz not null",
+        "updated_at": "timestamptz not null"
+      },
+      "trails": {
+        "id": "uuid pk",
+        "owner_id": "uuid not null references users(id)",
+        "title": "text not null",
+        "slug": "text unique not null",
+        "description": "text",
+        "cover_image_url": "text",
+        "distance_meters": "int not null",
+        "duration_seconds": "int not null",
+        "elevation_gain_meters": "int not null",
+        "route_path": "jsonb",
+        "start_point": "jsonb",
+        "end_point": "jsonb",
+        "region_label": "text",
+        "visibility": "text not null",
+        "created_at": "timestamptz not null",
+        "updated_at": "timestamptz not null"
+      },
+      "posts": {
+        "id": "uuid pk",
+        "author_id": "uuid not null references users(id)",
+        "trail_id": "uuid references trails(id)",
+        "caption": "text",
+        "likes_count": "int not null default 0",
+        "comments_count": "int not null default 0",
+        "visibility": "text not null",
+        "created_at": "timestamptz not null",
+        "updated_at": "timestamptz not null"
+      },
+      "post_media": {
+        "id": "uuid pk",
+        "post_id": "uuid not null references posts(id)",
+        "type": "text not null",
+        "url": "text not null",
+        "width": "int not null",
+        "height": "int not null",
+        "blurhash": "text",
+        "sort_order": "int not null"
+      },
+      "stories": {
+        "id": "uuid pk",
+        "author_id": "uuid not null references users(id)",
+        "trail_id": "uuid references trails(id)",
+        "media_url": "text not null",
+        "media_type": "text not null",
+        "width": "int not null",
+        "height": "int not null",
+        "caption": "text",
+        "expires_at": "timestamptz not null",
+        "created_at": "timestamptz not null"
+      }
+    }
+  }
+}

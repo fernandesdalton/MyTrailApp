@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
-import { type ComponentProps } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { type ComponentProps, useState } from 'react';
+import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FeedPostCard } from '@/features/home/components/feed-post-card';
@@ -11,7 +11,6 @@ import { AppText } from '@/shared/ui/app-text';
 
 type FeedIconName = ComponentProps<typeof SymbolView>['name'];
 
-const highlightChips = ['Dual Sport', 'Forest Trails', 'River Crossings', 'Sunset Loops'];
 const storyUsers = [
   { id: 'you', label: 'You', color: '#6D28D9' },
   { id: 'jake', label: 'Jake', color: '#A78BFA' },
@@ -19,19 +18,77 @@ const storyUsers = [
   { id: 'rafa', label: 'Rafa', color: '#DDD6FE' },
 ];
 
-function TopAction({ name }: { name: FeedIconName }) {
+function TopAction({
+  name,
+  onPress,
+  plus,
+}: {
+  name?: FeedIconName;
+  onPress?: () => void;
+  plus?: boolean;
+}) {
   return (
-    <Pressable style={styles.topAction}>
-      <SymbolView name={name} tintColor={colors.text} size={18} />
+    <Pressable style={styles.topAction} onPress={onPress}>
+      {plus ? (
+        <AppText style={styles.topActionPlus}>+</AppText>
+      ) : (
+        <SymbolView name={name!} tintColor={colors.text} size={18} />
+      )}
     </Pressable>
   );
 }
 
 export function HomeScreen() {
   const { data } = useFeedPostsQuery();
+  const [isComposerVisible, setIsComposerVisible] = useState(true);
+  const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <Modal
+        animationType="fade"
+        transparent
+        visible={isCreateMenuOpen}
+        onRequestClose={() => setIsCreateMenuOpen(false)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setIsCreateMenuOpen(false)}>
+          <Pressable style={styles.modalCard} onPress={() => undefined}>
+            <View style={styles.modalHeader}>
+              <AppText variant="title">Create</AppText>
+              <Pressable
+                onPress={() => setIsCreateMenuOpen(false)}
+                style={styles.modalCloseButton}>
+                <AppText style={styles.modalCloseLabel}>x</AppText>
+              </Pressable>
+            </View>
+            <AppText style={styles.modalSubtitle}>
+              Choose what you want to publish in TrailBlazer.
+            </AppText>
+
+            <View style={styles.modalActions}>
+              <Pressable style={styles.modalPrimaryAction}>
+                <AppText style={styles.modalPrimaryIcon}>+</AppText>
+                <View style={styles.modalActionCopy}>
+                  <AppText style={styles.modalPrimaryLabel}>New post</AppText>
+                  <AppText style={styles.modalPrimaryHint}>
+                    Share photos, stats, and how the trail felt.
+                  </AppText>
+                </View>
+              </Pressable>
+
+              <Pressable style={styles.modalSecondaryAction}>
+                <AppText style={styles.modalSecondaryIcon}>+</AppText>
+                <View style={styles.modalActionCopy}>
+                  <AppText style={styles.modalSecondaryLabel}>New Trail</AppText>
+                  <AppText style={styles.modalSecondaryHint}>
+                    Add a new route with distance, elevation, and ride notes.
+                  </AppText>
+                </View>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
           <View style={styles.topBar}>
@@ -52,6 +109,7 @@ export function HomeScreen() {
             </View>
 
             <View style={styles.topActions}>
+              <TopAction plus onPress={() => setIsCreateMenuOpen(true)} />
               <TopAction
                 name={{ ios: 'bell', android: 'notifications_none', web: 'notifications_none' }}
               />
@@ -61,36 +119,36 @@ export function HomeScreen() {
             </View>
           </View>
 
-          <View style={styles.composerCard}>
-            <View style={styles.composerHeader}>
-              <View style={styles.composerAvatar}>
-                <AppText style={styles.composerAvatarText}>D</AppText>
-              </View>
-              <View style={styles.composerCopy}>
-                <AppText variant="title" style={styles.composerTitle}>
-                  Share today&apos;s trail
-                </AppText>
-                <AppText>Post the best photo, route stats, and what the ride felt like.</AppText>
-              </View>
-            </View>
-            <View style={styles.composerFooter}>
-              <View style={styles.chipsRow}>
-                {highlightChips.map((chip) => (
-                  <View key={chip} style={styles.chip}>
-                    <AppText style={styles.chipText}>{chip}</AppText>
+          {isComposerVisible ? (
+            <View style={styles.composerCard}>
+              <View style={styles.composerTopRow}>
+                <View style={styles.composerHeader}>
+                  <View style={styles.composerAvatar}>
+                    <AppText style={styles.composerAvatarText}>D</AppText>
                   </View>
-                ))}
+                  <View style={styles.composerCopy}>
+                    <AppText variant="title" style={styles.composerTitle}>
+                      Share today&apos;s trail
+                    </AppText>
+                    <AppText style={styles.composerSubtitle}>
+                      Post the best photo, route stats, and what the ride felt like.
+                    </AppText>
+                  </View>
+                </View>
+                <Pressable
+                  onPress={() => setIsComposerVisible(false)}
+                  style={styles.composerCloseButton}>
+                  <AppText style={styles.composerCloseLabel}>x</AppText>
+                </Pressable>
               </View>
-              <Pressable style={styles.postButton}>
-                <SymbolView
-                  name={{ ios: 'plus', android: 'add', web: 'add' }}
-                  tintColor="#FFFFFF"
-                  size={18}
-                />
-                <AppText style={styles.postButtonText}>New post</AppText>
-              </Pressable>
+
+              <View style={styles.composerFooter}>
+                <AppText style={styles.composerHint}>
+                  Tap the `+` button in the top bar to create a new post or add a new trail.
+                </AppText>
+              </View>
             </View>
-          </View>
+          ) : null}
 
           <ScrollView
             horizontal
@@ -201,16 +259,122 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  topActionPlus: {
+    color: colors.text,
+    fontSize: 22,
+    lineHeight: 22,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(19, 8, 38, 0.55)',
+    paddingHorizontal: 20,
+  },
+  modalCard: {
+    gap: 14,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  modalCloseButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalCloseLabel: {
+    color: colors.accent,
+    fontSize: 20,
+    lineHeight: 20,
+    fontWeight: '700',
+  },
+  modalSubtitle: {
+    color: colors.textMuted,
+  },
+  modalActions: {
+    gap: 10,
+  },
+  modalPrimaryAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderRadius: 22,
+    backgroundColor: '#2E1065',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  modalSecondaryAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderRadius: 22,
+    backgroundColor: colors.accentSoft,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  modalPrimaryIcon: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    lineHeight: 24,
+    fontWeight: '700',
+  },
+  modalSecondaryIcon: {
+    color: colors.accent,
+    fontSize: 24,
+    lineHeight: 24,
+    fontWeight: '700',
+  },
+  modalActionCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  modalPrimaryLabel: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  modalPrimaryHint: {
+    color: '#DDD6FE',
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  modalSecondaryLabel: {
+    color: colors.accent,
+    fontWeight: '700',
+  },
+  modalSecondaryHint: {
+    color: colors.textMuted,
+    fontSize: 13,
+    lineHeight: 18,
+  },
   composerCard: {
     borderRadius: 28,
     padding: 18,
     backgroundColor: '#2E1065',
-    gap: 16,
+    gap: 14,
+  },
+  composerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   composerHeader: {
     flexDirection: 'row',
     gap: 12,
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    flex: 1,
   },
   composerAvatar: {
     width: 46,
@@ -231,38 +395,29 @@ const styles = StyleSheet.create({
   composerTitle: {
     color: '#FFFFFF',
   },
+  composerSubtitle: {
+    color: '#DDD6FE',
+  },
+  composerCloseButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  composerCloseLabel: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    lineHeight: 24,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
   composerFooter: {
     gap: 14,
   },
-  chipsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  chip: {
-    borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  chipText: {
-    color: '#F5EEFF',
-    fontSize: 13,
-    lineHeight: 16,
-  },
-  postButton: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    borderRadius: 999,
-    backgroundColor: '#F97316',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  postButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+  composerHint: {
+    color: '#DDD6FE',
   },
   storiesContent: {
     gap: 14,

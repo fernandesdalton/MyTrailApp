@@ -28,6 +28,7 @@ function formatCoordinate(value: number) {
 
 function safeRequireMapbox(): typeof MapboxModuleType | null {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require('@rnmapbox/maps').default as typeof MapboxModuleType;
   } catch {
     return null;
