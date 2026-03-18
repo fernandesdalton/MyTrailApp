@@ -1,57 +1,39 @@
 import { StyleSheet, View } from 'react-native';
 
+// Expo resolves platform files correctly here, but ESLint's import resolver does not.
+// eslint-disable-next-line import/no-unresolved
+import { CurrentLocationMap } from '@/features/home/components/current-location-map';
 import { colors } from '@/shared/theme/colors';
 import { AppScreen } from '@/shared/ui/app-screen';
 import { AppText } from '@/shared/ui/app-text';
 
-const architectureGroups = [
-  {
-    title: 'src/app',
-    description: 'Routing only. Keep loaders, navigation, and redirects here.',
-  },
-  {
-    title: 'src/features',
-    description: 'Business-centric modules with screens, api, queries, store, and components.',
-  },
-  {
-    title: 'src/shared',
-    description: 'Reusable primitives, theme tokens, and cross-feature libraries.',
-  },
-  {
-    title: 'src/core',
-    description: 'Top-level providers, app bootstrapping, and startup concerns.',
-  },
-];
-
 export function ExploreScreen() {
   return (
-    <AppScreen>
+    <AppScreen contentContainerStyle={styles.contentContainer}>
       <View style={styles.header}>
-        <AppText variant="headline">Project structure that scales</AppText>
+        <AppText variant="headline">Map</AppText>
         <AppText>
-          Start simple, but draw boundaries early. That keeps the app ready for real product work
-          instead of turning the first prototype into a long-term bottleneck.
+          Open the live map, see where you are, and use this space next for saved routes, nearby
+          riders, or trail discovery.
         </AppText>
       </View>
 
-      {architectureGroups.map((group) => (
-        <View key={group.title} style={styles.card}>
-          <AppText variant="title">{group.title}</AppText>
-          <AppText>{group.description}</AppText>
-        </View>
-      ))}
+      <CurrentLocationMap />
 
       <View style={styles.card}>
-        <AppText variant="title">Recommended rules of thumb</AppText>
-        <AppText>Feature files can depend on `shared` and `core`, but not on other features.</AppText>
-        <AppText>API shapes should be validated at the boundary before reaching UI.</AppText>
-        <AppText>Keep route components tiny and move most logic into feature screens.</AppText>
+        <AppText variant="title">Next map features</AppText>
+        <AppText>1. Pin saved rides and favorite loops.</AppText>
+        <AppText>2. Show nearby trail posts around the current viewport.</AppText>
+        <AppText>3. Let riders open route details directly from the map.</AppText>
       </View>
     </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
+  contentContainer: {
+    paddingBottom: 32,
+  },
   header: {
     gap: 12,
     paddingTop: 12,

@@ -26,9 +26,16 @@
     "plugins": [
       "expo-router",
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow MyTrailApp to access your location and show where you are on the map."
+        }
+      ],
+      "@rnmapbox/maps",
+      [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#6D28D9",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76

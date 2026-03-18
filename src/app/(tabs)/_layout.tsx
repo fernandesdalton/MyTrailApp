@@ -29,12 +29,12 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Overview',
+          title: 'Home',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               color={color}
               focused={focused}
-              name={{ ios: 'mountain.2.fill', android: 'explore', web: 'explore' }}
+              name={{ ios: 'house.fill', android: 'home', web: 'home' }}
             />
           ),
         }}
@@ -42,12 +42,12 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Architecture',
+          title: 'Map',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               color={color}
               focused={focused}
-              name={{ ios: 'square.stack.3d.up.fill', android: 'layers', web: 'layers' }}
+              name={{ ios: 'map.fill', android: 'map', web: 'map' }}
             />
           ),
         }}
