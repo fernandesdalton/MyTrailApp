@@ -1,56 +1,55 @@
-# Welcome to your Expo app 👋
+# MyTrailApp
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Modern React Native starter based on Expo SDK 55, React Native 0.83, Expo Router, React Query, Zustand, and Zod.
 
-## Get started
+## Stack
 
-1. Install dependencies
+- Expo framework and Expo Router for the recommended React Native workflow
+- React Native New Architecture and React Compiler enabled in `app.json`
+- TypeScript in strict mode
+- TanStack Query for server state
+- Zustand for lightweight client state
+- Zod for runtime validation and typed domain boundaries
 
-   ```bash
-   npm install
-   ```
+## Project structure
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```text
+src
+|- app/                 # Expo Router routes only
+|- core/
+|  \- providers/        # App-wide providers and bootstrapping
+|- features/            # Feature-first UI, queries, stores
+|- shared/
+|  |- lib/              # Cross-cutting libraries
+|  |- theme/            # Tokens and navigation theme
+|  \- ui/               # Reusable primitives
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Before running
 
-### Other setup steps
+This template was created with the latest Expo toolchain on March 18, 2026. The installed React Native version requires Node `20.19.4` or newer.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Your current machine is on Node `18.15.0`, so upgrade Node first or Metro and Expo commands may fail.
 
-## Learn more
+## Commands
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+npm install
+npm run start
+npm run check
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Architecture guidelines
 
-## Join the community
+- Keep routing files small and delegate real UI to `features/*/screens`
+- Put remote data behind feature `api` and `queries` modules
+- Put local UI state in feature stores, not global singletons by default
+- Keep `shared/ui` primitive and generic; avoid feature leakage there
+- Add native modules through Expo first, and only prebuild when a package truly requires it
 
-Join our community of developers creating universal apps.
+## Next good additions
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- Authentication flow with a dedicated route group such as `src/app/(auth)`
+- API client layer with request/response schemas using Zod
+- Testing with Jest and React Native Testing Library
+- CI checks for `npm run check`
