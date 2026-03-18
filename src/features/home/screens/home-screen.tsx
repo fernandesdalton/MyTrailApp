@@ -52,7 +52,7 @@ export function HomeScreen() {
           <AppText>3. Introduce tests around your first real feature, not generic examples.</AppText>
         </View>
         <Link href="/(tabs)/explore" asChild>
-          <Pressable style={[styles.button, styles.secondaryButton]}>
+          <Pressable style={styles.secondaryButtonLink}>
             <AppText style={styles.secondaryButtonText}>See project structure</AppText>
           </Pressable>
         </Link>
@@ -100,6 +100,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   secondaryButton: {
+    backgroundColor: colors.accentSoft,
+  },
+  secondaryButtonLink: {
+    alignSelf: 'flex-start',
+    borderRadius: 999,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     backgroundColor: colors.accentSoft,
   },
   secondaryButtonText: {
