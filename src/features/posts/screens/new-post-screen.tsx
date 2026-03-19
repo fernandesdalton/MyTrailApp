@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
-import { startTransition, useEffect, useState } from 'react';
+import { startTransition, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -59,9 +59,9 @@ export function NewPostScreen() {
     if (!data?.trails.length || selectedTrailId) {
       return;
     }
-
-    setSelectedTrailId(data.trails[0]?.id ?? null);
-  }, [data?.trails, selectedTrailId]);
+    const firstFavoriteTrailId = data.favoriteTrailIds?.[0] ?? null;
+    setSelectedTrailId(firstFavoriteTrailId);
+  }, [data?.favoriteTrailIds, data?.trails, selectedTrailId]);
 
   const selectedAuthor =
     data?.users.find((user) => user.id === selectedAuthorId) ??
@@ -76,7 +76,11 @@ export function NewPostScreen() {
         ? localMockUser
         : null);
   const selectedTrail = data?.trails.find((trail) => trail.id === selectedTrailId) ?? null;
-  const trailCount = data?.trails.length ?? 0;
+  const favoriteTrails = useMemo(
+    () => (data?.trails ?? []).filter((trail) => data?.favoriteTrailIds?.includes(trail.id)),
+    [data?.favoriteTrailIds, data?.trails]
+  );
+  const trailCount = favoriteTrails.length;
 
   const isSubmitDisabled =
     !selectedAuthor || !selectedMedia.url.trim() || createPostMutation.isPending || createPostMutation.isSuccess;
@@ -232,7 +236,7 @@ export function NewPostScreen() {
           <View style={styles.sectionHeader}>
             <AppText style={styles.sectionLabel}>LINK TRAIL</AppText>
             <AppText style={styles.sectionAction}>
-              {trailCount > 0 ? `${trailCount} READY` : 'OPTIONAL'}
+              {trailCount > 0 ? `${trailCount} FAVORITES` : 'NO FAVORITES'}
             </AppText>
           </View>
 
@@ -268,30 +272,91 @@ export function NewPostScreen() {
             </View>
           )}
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.trailPicker}>
-            {data?.trails.map((trail) => {
-              const isSelected = trail.id === selectedTrailId;
+          <View style={styles.favoritePanel}>
+            <View style={styles.favoritePanelHeader}>
+              <View>
+                <AppText style={styles.favoritePanelTitle}>Saved trails</AppText>
+                <AppText style={styles.favoritePanelCopy}>
+                  Only your favorited trails show up here when attaching a route to a post.
+                </AppText>
+              </View>
+              <Pressable
+                onPress={() => router.push('/(tabs)/trails')}
+                style={styles.browseTrailsButton}>
+                <AppText style={styles.browseTrailsButtonLabel}>Browse all</AppText>
+              </Pressable>
+            </View>
 
-              return (
-                <Pressable
-                  key={trail.id}
-                  onPress={() => setSelectedTrailId(trail.id)}
-                  style={[styles.trailChip, isSelected && styles.trailChipActive]}>
-                  <View style={styles.trailChipCopy}>
-                    <AppText style={[styles.trailChipLabel, isSelected && styles.trailChipLabelActive]}>
-                      {trail.title}
-                    </AppText>
-                    {trail.regionLabel ? (
-                      <AppText
-                        style={[styles.trailChipMeta, isSelected && styles.trailChipMetaActive]}>
-                        {trail.regionLabel}
-                      </AppText>
-                    ) : null}
-                  </View>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+            <View style={styles.favoriteTrailList}>
+              {favoriteTrails.length > 0 ? (
+                favoriteTrails.map((trail) => {
+                  const isSelected = trail.id === selectedTrailId;
+
+                  return (
+                    <Pressable
+                      key={trail.id}
+                      onPress={() => setSelectedTrailId(trail.id)}
+                      style={[styles.favoriteTrailCard, isSelected && styles.favoriteTrailCardActive]}>
+                      <View style={styles.favoriteTrailImageWrap}>
+                        <Image
+                          source={trail.coverImageUrl ?? sampleMedia.url}
+                          style={styles.favoriteTrailImage}
+                          contentFit="cover"
+                        />
+                        <View style={styles.favoriteTrailOverlay} />
+                        <View style={styles.favoriteTrailTopRow}>
+                          <View style={styles.favoriteTrailDistancePill}>
+                            <AppText style={styles.favoriteTrailDistancePillText}>
+                              {`${(trail.userDistanceKm ?? trail.distanceMeters / 1000).toFixed(1)} KM AWAY`}
+                            </AppText>
+                          </View>
+                        </View>
+                        <View style={styles.favoriteTrailBottom}>
+                          <AppText style={styles.favoriteTrailTitle}>{trail.title.toUpperCase()}</AppText>
+                          {trail.regionLabel ? (
+                            <AppText style={styles.favoriteTrailRegion}>{trail.regionLabel}</AppText>
+                          ) : null}
+                        </View>
+                      </View>
+
+                      <View style={styles.favoriteTrailStats}>
+                        <View style={styles.favoriteTrailStat}>
+                          <AppText style={styles.favoriteTrailStatLabel}>LENGTH</AppText>
+                          <AppText style={styles.favoriteTrailStatValue}>
+                            {`${(trail.distanceMeters / 1000).toFixed(1)} km`}
+                          </AppText>
+                        </View>
+                        <View style={styles.favoriteTrailStat}>
+                          <AppText style={styles.favoriteTrailStatLabel}>GRADE</AppText>
+                          <AppText style={styles.favoriteTrailStatValue}>
+                            {trail.gradeLabel ?? 'MIXED'}
+                          </AppText>
+                        </View>
+                        <View style={styles.favoriteTrailStat}>
+                          <AppText style={styles.favoriteTrailStatLabel}>EST TIME</AppText>
+                          <AppText style={styles.favoriteTrailStatValue}>
+                            {trail.estimatedTimeLabel ?? `${Math.max(Math.round(trail.durationSeconds / 3600), 1)} HR`}
+                          </AppText>
+                        </View>
+                      </View>
+                    </Pressable>
+                  );
+                })
+              ) : (
+                <View style={styles.emptyFavoritesCard}>
+                  <AppText style={styles.emptyFavoritesTitle}>No saved favorites yet</AppText>
+                  <AppText style={styles.emptyFavoritesCopy}>
+                    Open the Trails screen, save the routes you like, and they will appear here for post linking.
+                  </AppText>
+                  <Pressable
+                    onPress={() => router.push('/(tabs)/trails')}
+                    style={styles.emptyFavoritesButton}>
+                    <AppText style={styles.emptyFavoritesButtonLabel}>Open trails</AppText>
+                  </Pressable>
+                </View>
+              )}
+            </View>
+          </View>
         </View>
 
         <View style={styles.statsRow}>
@@ -601,40 +666,195 @@ const styles = StyleSheet.create({
   emptyCardText: {
     color: colors.textMuted,
   },
-  trailPicker: {
-    gap: 8,
+  favoritePanel: {
+    gap: 12,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#3C2B1A',
+    backgroundColor: '#17120F',
+    paddingHorizontal: 14,
+    paddingVertical: 16,
   },
-  trailChip: {
+  favoritePanelHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
+  },
+  favoritePanelTitle: {
+    color: colors.text,
+    fontSize: 16,
+    lineHeight: 20,
+    fontWeight: '800',
+  },
+  favoritePanelCopy: {
+    color: colors.textMuted,
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 4,
+    maxWidth: 220,
+  },
+  browseTrailsButton: {
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: '#5A361E',
+    backgroundColor: colors.accentSoft,
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
-  trailChipCopy: {
-    gap: 2,
-  },
-  trailChipActive: {
-    backgroundColor: colors.accentSoft,
-    borderColor: '#5A361E',
-  },
-  trailChipLabel: {
-    color: colors.textMuted,
-    fontSize: 13,
-    lineHeight: 16,
-    fontWeight: '600',
-  },
-  trailChipLabelActive: {
-    color: colors.text,
-  },
-  trailChipMeta: {
-    color: colors.textMuted,
-    fontSize: 11,
-    lineHeight: 14,
-  },
-  trailChipMetaActive: {
+  browseTrailsButtonLabel: {
     color: colors.accent,
+    fontSize: 12,
+    lineHeight: 14,
+    fontWeight: '800',
+  },
+  favoriteTrailList: {
+    gap: 12,
+  },
+  favoriteTrailCard: {
+    borderRadius: 22,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#2B221C',
+    backgroundColor: '#13100D',
+  },
+  favoriteTrailCardActive: {
+    borderColor: colors.accent,
+    shadowColor: '#FF7A12',
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+  },
+  favoriteTrailImageWrap: {
+    minHeight: 212,
+    justifyContent: 'space-between',
+    padding: 14,
+  },
+  favoriteTrailImage: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  favoriteTrailOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(10, 8, 6, 0.42)',
+  },
+  favoriteTrailTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  favoriteTrailDistancePill: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(17, 13, 9, 0.82)',
+    borderWidth: 1,
+    borderColor: '#5C4126',
+  },
+  favoriteTrailDistancePillText: {
+    color: '#F8EEDF',
+    fontSize: 10,
+    lineHeight: 12,
+    fontWeight: '800',
+  },
+  favoriteTrailActions: {
+    gap: 8,
+  },
+  favoriteActionButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(17, 13, 9, 0.82)',
+    borderWidth: 1,
+    borderColor: '#4B3A2C',
+  },
+  favoriteActionButtonActive: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
+  },
+  favoriteActionLabel: {
+    color: colors.text,
+    fontSize: 14,
+    lineHeight: 14,
+    fontWeight: '800',
+  },
+  favoriteActionLabelActive: {
+    color: '#130A25',
+  },
+  favoriteTrailBottom: {
+    gap: 4,
+    marginTop: 'auto',
+  },
+  favoriteTrailTitle: {
+    color: '#FFF4E9',
+    fontSize: 22,
+    lineHeight: 26,
+    fontWeight: '900',
+  },
+  favoriteTrailRegion: {
+    color: '#D7C3AF',
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  favoriteTrailStats: {
+    flexDirection: 'row',
+    gap: 1,
+    backgroundColor: '#0F0D0B',
+  },
+  favoriteTrailStat: {
+    flex: 1,
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: '#171310',
+  },
+  favoriteTrailStatLabel: {
+    color: '#7D6F63',
+    fontSize: 10,
+    lineHeight: 12,
+    fontWeight: '800',
+  },
+  favoriteTrailStatValue: {
+    color: '#F7EFE5',
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '800',
+  },
+  emptyFavoritesCard: {
+    gap: 6,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#3C2B1A',
+    backgroundColor: '#1A1511',
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+  },
+  emptyFavoritesTitle: {
+    color: colors.text,
+    fontSize: 15,
+    lineHeight: 18,
+    fontWeight: '700',
+  },
+  emptyFavoritesCopy: {
+    color: colors.textMuted,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  emptyFavoritesButton: {
+    alignSelf: 'flex-start',
+    marginTop: 6,
+    borderRadius: 999,
+    backgroundColor: colors.accent,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  emptyFavoritesButtonLabel: {
+    color: '#130A25',
+    fontSize: 12,
+    lineHeight: 14,
+    fontWeight: '800',
   },
   statsRow: {
     flexDirection: 'row',

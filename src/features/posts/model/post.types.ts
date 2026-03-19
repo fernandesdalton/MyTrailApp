@@ -23,6 +23,11 @@ export type TrailSummary = {
   durationSeconds: number;
   elevationGainMeters: number;
   regionLabel?: string | null;
+  userDistanceKm?: number | null;
+  gradeLabel?: string | null;
+  estimatedTimeLabel?: string | null;
+  coverImageUrl?: string | null;
+  isLiked?: boolean;
 };
 
 export type ApiFeedPost = {

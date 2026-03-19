@@ -60,8 +60,13 @@ describe('post creation', () => {
             distanceMeters: 9600,
             durationSeconds: 8100,
             elevationGainMeters: 420,
+            userDistanceKm: 4.2,
+            gradeLabel: 'HARD',
+            estimatedTimeLabel: '2.5 HR',
+            coverImageUrl: 'https://example.com/black-rock.jpg',
           },
         ],
+        favoriteTrailIds: ['22222222-2222-4222-8222-222222222222'],
       },
       isLoading: false,
     });
@@ -77,11 +82,13 @@ describe('post creation', () => {
   });
 
   it('renders the new post screen with composer content', () => {
-    const { getByText } = render(<NewPostScreen />);
+    const { getAllByText, getByText } = render(<NewPostScreen />);
 
     expect(getByText('NEW POST')).toBeTruthy();
     expect(getByText('CAPTURE OR UPLOAD')).toBeTruthy();
-    expect(getByText('BLACK ROCK CANYON')).toBeTruthy();
+    expect(getAllByText('BLACK ROCK CANYON').length).toBeGreaterThan(0);
+    expect(getByText('Saved trails')).toBeTruthy();
+    expect(getByText('Browse all')).toBeTruthy();
     expect(getByText('Using the sample ride photo')).toBeTruthy();
     expect(getByText('A temporary sample image is attached until you pick one from your gallery.')).toBeTruthy();
   });
@@ -124,13 +131,13 @@ describe('post creation', () => {
           username: 'alex',
           displayName: 'Alex',
         },
-        trail: {
+        trail: expect.objectContaining({
           id: '22222222-2222-4222-8222-222222222222',
           title: 'Black Rock Canyon',
           distanceMeters: 9600,
           durationSeconds: 8100,
           elevationGainMeters: 420,
-        },
+        }),
       })
     );
     expect(mockedRouter.replace).toHaveBeenCalledWith('/(tabs)');
@@ -224,6 +231,9 @@ describe('post creation', () => {
             durationSeconds: 5400,
             elevationGainMeters: 310,
             regionLabel: 'St. George, UT',
+            userDistanceKm: 7.8,
+            gradeLabel: 'ELITE',
+            estimatedTimeLabel: '5.8 HR',
           },
           {
             id: '55555555-5555-4555-8555-555555555555',
@@ -232,17 +242,21 @@ describe('post creation', () => {
             durationSeconds: 14400,
             elevationGainMeters: 1240,
             regionLabel: 'Bend, OR',
+            userDistanceKm: 9.2,
+            gradeLabel: 'EASY',
+            estimatedTimeLabel: '4.2 HR',
           },
         ],
+        favoriteTrailIds: ['44444444-4444-4444-8444-444444444444', '55555555-5555-4555-8555-555555555555'],
       },
       isLoading: false,
     });
 
     const { getAllByText, getByText } = render(<NewPostScreen />);
 
-    expect(getByText('2 READY')).toBeTruthy();
-    expect(getByText('Red Sand Wash')).toBeTruthy();
-    expect(getByText('Pine Switchbacks')).toBeTruthy();
+    expect(getByText('2 FAVORITES')).toBeTruthy();
+    expect(getAllByText('RED SAND WASH').length).toBeGreaterThan(0);
+    expect(getAllByText('PINE SWITCHBACKS').length).toBeGreaterThan(0);
     expect(getAllByText('St. George, UT').length).toBeGreaterThan(0);
   });
 });

@@ -18,13 +18,15 @@ function TopAction({
   name,
   onPress,
   plus,
+  testID,
 }: {
   name?: FeedIconName;
   onPress?: () => void;
   plus?: boolean;
+  testID?: string;
 }) {
   return (
-    <Pressable style={styles.topAction} onPress={onPress}>
+    <Pressable style={styles.topAction} onPress={onPress} testID={testID}>
       {plus ? (
         <AppText style={styles.topActionPlus}>+</AppText>
       ) : (
@@ -40,10 +42,16 @@ export function HomeScreen() {
   const { data: stories } = useHomeStoriesQuery();
   const [isComposerVisible, setIsComposerVisible] = useState(true);
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   function openNewPostScreen() {
     setIsCreateMenuOpen(false);
     router.push('/new-post');
+  }
+
+  function openProfileTab() {
+    setIsMenuOpen(false);
+    router.push('/(tabs)/profile');
   }
 
   return (
@@ -92,9 +100,64 @@ export function HomeScreen() {
         </Pressable>
       </Modal>
 
+      <Modal
+        animationType="fade"
+        transparent
+        visible={isMenuOpen}
+        onRequestClose={() => setIsMenuOpen(false)}>
+        <Pressable style={styles.menuBackdrop} onPress={() => setIsMenuOpen(false)}>
+          <Pressable style={styles.menuCard} onPress={() => undefined}>
+            <View style={styles.menuHeader}>
+              <View style={styles.menuProfileRow}>
+                <View style={styles.menuAvatar}>
+                  <AppText style={styles.menuAvatarLabel}>
+                    {session?.user.displayName?.charAt(0).toUpperCase() ?? 'R'}
+                  </AppText>
+                </View>
+                <View style={styles.menuProfileCopy}>
+                  <AppText style={styles.menuName}>{session?.user.displayName ?? 'Rider'}</AppText>
+                  <AppText style={styles.menuHandle}>{`@${session?.user.username ?? 'trailblazer'}`}</AppText>
+                </View>
+              </View>
+              <Pressable onPress={() => setIsMenuOpen(false)} style={styles.modalCloseButton}>
+                <AppText style={styles.modalCloseLabel}>x</AppText>
+              </Pressable>
+            </View>
+
+            <View style={styles.menuActions}>
+              <Pressable onPress={openProfileTab} style={styles.menuAction}>
+                <AppText style={styles.menuActionTitle}>Profile</AppText>
+                <AppText style={styles.menuActionHint}>See your rider card and account details.</AppText>
+              </Pressable>
+              <Pressable style={styles.menuAction}>
+                <AppText style={styles.menuActionTitle}>Informations</AppText>
+                <AppText style={styles.menuActionHint}>App info, support, and upcoming features.</AppText>
+              </Pressable>
+              <Pressable style={styles.menuAction}>
+                <AppText style={styles.menuActionTitle}>Preferences</AppText>
+                <AppText style={styles.menuActionHint}>Tune feed, tracking, and trail discovery settings.</AppText>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  setIsMenuOpen(false);
+                  void signOut();
+                }}
+                style={[styles.menuAction, styles.menuActionDanger]}>
+                <AppText style={styles.menuActionDangerTitle}>Disconnect</AppText>
+                <AppText style={styles.menuActionHint}>Sign out from this device.</AppText>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
           <View style={styles.topBar}>
+            <View style={styles.topBarSide}>
+              <TopAction plus onPress={() => setIsCreateMenuOpen(true)} testID="open-create-menu" />
+            </View>
+
             <View style={styles.brandRow}>
               <View style={styles.brandBadge}>
                 <Image
@@ -111,17 +174,12 @@ export function HomeScreen() {
               </View>
             </View>
 
-            <View style={styles.topActions}>
-              <TopAction plus onPress={() => setIsCreateMenuOpen(true)} />
+            <View style={styles.topBarSide}>
               <TopAction
-                name={{ ios: 'bell', android: 'notifications_none', web: 'notifications_none' }}
+                name={{ ios: 'line.3.horizontal', android: 'menu', web: 'menu' }}
+                onPress={() => setIsMenuOpen(true)}
+                testID="open-main-menu"
               />
-              <TopAction
-                name={{ ios: 'paperplane', android: 'near_me', web: 'near_me' }}
-              />
-              <Pressable onPress={() => void signOut()} style={styles.topAction}>
-                <AppText style={styles.topActionLogout}>x</AppText>
-              </Pressable>
             </View>
           </View>
 
@@ -145,7 +203,8 @@ export function HomeScreen() {
                 </View>
                 <Pressable
                   onPress={() => setIsComposerVisible(false)}
-                  style={styles.composerCloseButton}>
+                  style={styles.composerCloseButton}
+                  testID="close-home-composer">
                   <AppText style={styles.composerCloseLabel}>x</AppText>
                 </Pressable>
               </View>
@@ -226,11 +285,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
   },
+  topBarSide: {
+    width: 42,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     flex: 1,
+    justifyContent: 'center',
   },
   brandBadge: {
     width: 46,
@@ -253,10 +318,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
-  topActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
   topAction: {
     width: 38,
     height: 38,
@@ -274,13 +335,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
   },
-  topActionLogout: {
-    color: colors.accent,
-    fontSize: 18,
-    lineHeight: 18,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
   modalBackdrop: {
     flex: 1,
     justifyContent: 'center',
@@ -294,6 +348,99 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
     padding: 20,
+  },
+  menuBackdrop: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    backgroundColor: 'rgba(10, 8, 14, 0.5)',
+    paddingTop: 82,
+    paddingRight: 16,
+    paddingLeft: 56,
+  },
+  menuCard: {
+    width: '100%',
+    maxWidth: 300,
+    gap: 14,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    padding: 18,
+  },
+  menuHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+    alignItems: 'flex-start',
+  },
+  menuProfileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  menuAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.accent,
+  },
+  menuAvatarLabel: {
+    color: '#130A25',
+    fontSize: 16,
+    lineHeight: 18,
+    fontWeight: '800',
+  },
+  menuProfileCopy: {
+    gap: 2,
+    flex: 1,
+  },
+  menuName: {
+    color: colors.text,
+    fontSize: 15,
+    lineHeight: 18,
+    fontWeight: '700',
+  },
+  menuHandle: {
+    color: colors.textMuted,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  menuActions: {
+    gap: 10,
+  },
+  menuAction: {
+    gap: 3,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceStrong,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
+  menuActionDanger: {
+    borderColor: '#5A2A1E',
+    backgroundColor: '#231310',
+  },
+  menuActionTitle: {
+    color: colors.text,
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: '700',
+  },
+  menuActionDangerTitle: {
+    color: colors.accent,
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: '800',
+  },
+  menuActionHint: {
+    color: colors.textMuted,
+    fontSize: 12,
+    lineHeight: 17,
   },
   modalHeader: {
     flexDirection: 'row',

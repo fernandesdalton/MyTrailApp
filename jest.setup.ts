@@ -35,6 +35,17 @@ jest.mock('expo-image-picker', () => ({
   })),
 }));
 
+jest.mock('@react-native-community/slider', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+
+  const MockSlider = ({ children, ...props }: Record<string, unknown>) =>
+    React.createElement(View, props, children);
+  MockSlider.displayName = 'MockSlider';
+
+  return MockSlider;
+});
+
 jest.mock('expo-secure-store', () => {
   const storage = new Map<string, string>();
 

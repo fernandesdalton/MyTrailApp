@@ -19,6 +19,22 @@ jest.mock('@/features/explore/screens/explore-screen', () => ({
   },
 }));
 
+jest.mock('@/features/trails/screens/trails-screen', () => ({
+  TrailsScreen: () => {
+    const React = require('react');
+    const { Text } = require('react-native');
+    return React.createElement(Text, null, 'trails-screen');
+  },
+}));
+
+jest.mock('@/features/profile/screens/profile-screen', () => ({
+  ProfileScreen: () => {
+    const React = require('react');
+    const { Text } = require('react-native');
+    return React.createElement(Text, null, 'profile-screen');
+  },
+}));
+
 jest.mock('@/features/posts/screens/new-post-screen', () => ({
   NewPostScreen: () => {
     const React = require('react');
@@ -57,6 +73,8 @@ import Index from '@/app/index';
 import NewPostRoute from '@/app/new-post';
 import ExploreRoute from '@/app/(tabs)/explore';
 import OverviewRoute from '@/app/(tabs)/index';
+import ProfileRoute from '@/app/(tabs)/profile';
+import TrailsRoute from '@/app/(tabs)/trails';
 import TabsLayout from '@/app/(tabs)/_layout';
 import LoginRoute from '@/app/(auth)/login';
 import RegisterRoute from '@/app/(auth)/register';
@@ -85,12 +103,14 @@ describe('core providers and routes', () => {
 
   it('renders tab route wrappers', () => {
     expect(render(<OverviewRoute />).getByText('home-screen')).toBeTruthy();
+    expect(render(<TrailsRoute />).getByText('trails-screen')).toBeTruthy();
     expect(render(<ExploreRoute />).getByText('explore-screen')).toBeTruthy();
+    expect(render(<ProfileRoute />).getByText('profile-screen')).toBeTruthy();
   });
 
   it('renders auth and protected route wrappers', () => {
-    expect(render(<LoginRoute />).getByText('NEW LOGIN')).toBeTruthy();
-    expect(render(<RegisterRoute />).getByText('CREATE ACCOUNT')).toBeTruthy();
+    expect(render(<LoginRoute />).getByText('Welcome back')).toBeTruthy();
+    expect(render(<RegisterRoute />).getByText('JOIN THE PACK')).toBeTruthy();
     expect(render(<NewPostRoute />).getByText('new-post-screen')).toBeTruthy();
   });
 });

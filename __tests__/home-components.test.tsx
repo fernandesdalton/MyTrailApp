@@ -66,6 +66,7 @@ const mockedRouter = router as unknown as {
   push: jest.Mock;
 };
 const mockedUseAuthSession = useAuthSession as jest.Mock;
+const mockedSignOut = jest.fn();
 
 describe('home components and screen', () => {
   beforeEach(() => {
@@ -78,12 +79,13 @@ describe('home components and screen', () => {
           displayName: 'Alex',
         },
       },
-      signOut: jest.fn(),
+      signOut: mockedSignOut,
     });
     (Location.requestForegroundPermissionsAsync as jest.Mock).mockImplementation(
       () => new Promise(() => undefined)
     );
     mockedRouter.push.mockReset();
+    mockedSignOut.mockReset();
   });
 
   it('renders feed post card content', () => {
@@ -113,19 +115,30 @@ describe('home components and screen', () => {
   });
 
   it('renders home screen feed and opens create modal then hides composer', () => {
-    const { getAllByText, getByText, queryByText } = render(<HomeScreen />);
+    const { getByTestId, getByText, queryByText } = render(<HomeScreen />);
 
     expect(getByText('TrailBlazer')).toBeTruthy();
     expect(getByText('Trail feed')).toBeTruthy();
     expect(getByText("Share today's trail")).toBeTruthy();
     expect(getByText('You')).toBeTruthy();
 
-    fireEvent.press(getAllByText('x')[1]!);
+    fireEvent.press(getByTestId('close-home-composer'));
     expect(queryByText("Share today's trail")).toBeNull();
 
-    fireEvent.press(getByText('+'));
+    fireEvent.press(getByTestId('open-create-menu'));
     expect(getByText('Choose what you want to publish in TrailBlazer.')).toBeTruthy();
     fireEvent.press(getByText('New post'));
     expect(mockedRouter.push).toHaveBeenCalledWith('/new-post');
+  });
+
+  it('opens hamburger menu actions and can sign out', () => {
+    const { getByTestId, getByText } = render(<HomeScreen />);
+
+    fireEvent.press(getByTestId('open-main-menu'));
+    expect(getByText('Disconnect')).toBeTruthy();
+    expect(getByText('Profile')).toBeTruthy();
+
+    fireEvent.press(getByText('Disconnect'));
+    expect(mockedSignOut).toHaveBeenCalled();
   });
 });
