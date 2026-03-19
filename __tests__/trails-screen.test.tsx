@@ -1,4 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react-native';
 
 import { useAuthSession } from '@/features/auth/hooks/use-auth-session';
@@ -64,11 +65,25 @@ describe('trails screen', () => {
       isLoading: false,
     });
 
-    const { getByText } = render(<TrailsScreen />);
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+          gcTime: Infinity,
+        },
+      },
+    });
+
+    const { getByText } = render(
+      <QueryClientProvider client={queryClient}>
+        <TrailsScreen />
+      </QueryClientProvider>
+    );
 
     expect(getByText('Trails nearby')).toBeTruthy();
     expect(getByText('2 RESULTS')).toBeTruthy();
     expect(getByText('SILVER KING RUN')).toBeTruthy();
     expect(getByText('DEVIL PASS')).toBeTruthy();
+    queryClient.clear();
   });
 });

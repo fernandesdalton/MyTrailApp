@@ -89,6 +89,7 @@ jest.mock('expo-router', () => {
     push: jest.fn(),
     back: jest.fn(),
     replace: jest.fn(),
+    canGoBack: jest.fn(() => false),
   };
   const Screen = () => null;
   const Stack = ({ children }: { children: React.ReactNode }) => React.createElement(View, null, children);
@@ -102,6 +103,7 @@ jest.mock('expo-router', () => {
     Tabs,
     router: mockRouter,
     useRouter: () => mockRouter,
+    useLocalSearchParams: () => ({}),
     __mockRouter: mockRouter,
   };
 });

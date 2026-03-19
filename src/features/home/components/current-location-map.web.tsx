@@ -1,9 +1,7 @@
 import { View } from 'react-native';
 
-import {
-  currentLocationMapStyles as styles,
-  MapNoticeCard,
-} from '@/features/home/components/current-location-map.shared';
+import { currentLocationMapStyles as styles } from '@/features/home/components/current-location-map.shared.styles';
+import { MapNoticeCard } from '@/features/home/components/current-location-map.shared';
 
 export function CurrentLocationMap() {
   return (

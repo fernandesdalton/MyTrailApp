@@ -1,7 +1,7 @@
 import { type PropsWithChildren } from 'react';
-import { StyleSheet, Text, type StyleProp, type TextProps, type TextStyle } from 'react-native';
+import { Text, type StyleProp, type TextProps, type TextStyle } from 'react-native';
 
-import { colors } from '@/shared/theme/colors';
+import { appTextStyles as styles } from '@/shared/ui/app-text.styles';
 
 type AppTextProps = PropsWithChildren<{
   style?: StyleProp<TextStyle>;
@@ -16,28 +16,3 @@ export function AppText({ children, style, variant = 'body', ...textProps }: App
     </Text>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    color: colors.text,
-  },
-  body: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  caption: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: colors.textMuted,
-  },
-  headline: {
-    fontSize: 28,
-    fontWeight: '700',
-    lineHeight: 34,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-    lineHeight: 26,
-  },
-});

@@ -3,32 +3,29 @@ import { type UserSummary } from '@/features/posts/model/post.types';
 export type AuthProvider = 'password' | 'google' | 'apple';
 
 export type AuthUser = UserSummary & {
-  email: string;
+  bio?: string | null;
+  locationLabel?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  email?: string;
 };
 
 export type AuthSession = {
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string | null;
   expiresAt: string;
   provider: AuthProvider;
+  tokenType?: string;
   user: AuthUser;
 };
 
-export type StoredCredential = {
-  email: string;
-  password: string;
-  userId: string;
-  username: string;
-  displayName: string;
-  createdAt: string;
-};
-
 export type LoginPayload = {
-  email: string;
+  username: string;
   password: string;
 };
 
 export type RegisterPayload = {
+  username?: string;
   displayName: string;
   email: string;
   password: string;

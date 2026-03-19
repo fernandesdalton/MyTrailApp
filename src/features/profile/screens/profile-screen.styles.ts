@@ -1,0 +1,345 @@
+import { StyleSheet } from 'react-native';
+
+import { colors } from '@/shared/theme/colors';
+
+export const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  content: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 18,
+  },
+  hero: {
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    gap: 16,
+  },
+  heroTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 10,
+  },
+  handleRow: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  handle: {
+    color: colors.text,
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: '700',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  headerIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surfaceStrong,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  headerIconLabel: {
+    color: colors.text,
+    fontSize: 16,
+    lineHeight: 18,
+    fontWeight: '700',
+  },
+  profileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  avatarRing: {
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: colors.accent,
+  },
+  avatarFallback: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.accent,
+  },
+  avatarLabel: {
+    color: '#130A25',
+    fontSize: 28,
+    lineHeight: 30,
+    fontWeight: '800',
+  },
+  statsRow: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
+  },
+  statValue: {
+    color: colors.text,
+    fontSize: 18,
+    lineHeight: 20,
+    fontWeight: '800',
+  },
+  statLabel: {
+    color: colors.textMuted,
+    fontSize: 10,
+    lineHeight: 12,
+    fontWeight: '800',
+  },
+  bioBlock: {
+    gap: 6,
+  },
+  name: {
+    color: colors.text,
+    fontSize: 22,
+    lineHeight: 26,
+    fontWeight: '800',
+  },
+  bio: {
+    color: colors.textMuted,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  location: {
+    color: colors.accent,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '700',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  primaryAction: {
+    flex: 1,
+    borderRadius: 14,
+    backgroundColor: colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+  },
+  primaryActionLabel: {
+    color: '#130A25',
+    fontSize: 14,
+    lineHeight: 16,
+    fontWeight: '800',
+  },
+  secondaryAction: {
+    flex: 1,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceStrong,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+  },
+  secondaryActionLabel: {
+    color: colors.text,
+    fontSize: 14,
+    lineHeight: 16,
+    fontWeight: '700',
+  },
+  segmentedRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  segment: {
+    flex: 1,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceStrong,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+  },
+  segmentActive: {
+    borderColor: colors.accent,
+    backgroundColor: colors.accentSoft,
+  },
+  segmentLabel: {
+    color: colors.textMuted,
+    fontSize: 13,
+    lineHeight: 16,
+    fontWeight: '700',
+  },
+  segmentLabelActive: {
+    color: colors.accent,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  gridTile: {
+    width: '31.9%',
+    aspectRatio: 1,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: colors.surfaceStrong,
+  },
+  gridImage: {
+    width: '100%',
+    height: '100%',
+  },
+  favoriteList: {
+    gap: 8,
+  },
+  favoriteCard: {
+    flexDirection: 'row',
+    gap: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceStrong,
+    padding: 10,
+  },
+  favoriteImage: {
+    width: 96,
+    aspectRatio: 1,
+    borderRadius: 14,
+  },
+  favoriteCopy: {
+    flex: 1,
+    gap: 4,
+    justifyContent: 'center',
+  },
+  favoriteTitle: {
+    color: colors.text,
+    fontSize: 15,
+    lineHeight: 18,
+    fontWeight: '700',
+  },
+  favoriteMeta: {
+    color: colors.textMuted,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  favoriteRegion: {
+    color: colors.accent,
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: '700',
+  },
+  connectSection: {
+    gap: 10,
+  },
+  connectHeader: {
+    gap: 2,
+  },
+  connectTitle: {
+    color: colors.text,
+    fontSize: 15,
+    lineHeight: 18,
+    fontWeight: '700',
+  },
+  connectSubtitle: {
+    color: colors.textMuted,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  connectRow: {
+    gap: 10,
+  },
+  connectCard: {
+    width: 132,
+    gap: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceStrong,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  connectProfileLink: {
+    width: '100%',
+    alignItems: 'center',
+    gap: 6,
+  },
+  connectAvatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.accentSoft,
+    borderWidth: 1,
+    borderColor: '#5A361E',
+    overflow: 'hidden',
+  },
+  connectAvatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+  connectAvatarLabel: {
+    color: colors.accent,
+    fontWeight: '800',
+  },
+  connectName: {
+    color: colors.text,
+    fontSize: 13,
+    lineHeight: 16,
+    fontWeight: '700',
+    textAlign: 'center',
+    width: '100%',
+  },
+  connectHandle: {
+    color: colors.textMuted,
+    fontSize: 11,
+    lineHeight: 14,
+    textAlign: 'center',
+    width: '100%',
+  },
+  connectButton: {
+    marginTop: 2,
+    width: '100%',
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    backgroundColor: colors.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+  },
+  connectButtonActive: {
+    backgroundColor: colors.accent,
+  },
+  connectButtonLabel: {
+    color: colors.accent,
+    fontSize: 12,
+    lineHeight: 14,
+    fontWeight: '800',
+  },
+  connectButtonLabelActive: {
+    color: '#130A25',
+  },
+});
+
+export function getProfileAvatarImageStyle(size: number) {
+  return {
+    width: size,
+    height: size,
+    borderRadius: size / 2,
+  } as const;
+}

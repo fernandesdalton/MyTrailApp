@@ -1,31 +1,44 @@
-import { mockTrails } from '@/features/posts/constants/mock-trails';
-import { getFavoriteTrailIds } from '@/features/posts/lib/trail-favorites-storage';
-import { localMockUser } from '@/features/posts/constants/mock-user';
 import { getCachedSession } from '@/features/auth/lib/auth-session';
+import { type UserSummary } from '@/features/posts/model/post.types';
 import { trailsApi } from '@/shared/lib/api/resources/trails-api';
 import { mapTrailToSummary, type Trail } from '@/shared/lib/api/resources';
-import { type UserSummary } from '@/features/posts/model/post.types';
+import { usersApi } from '@/shared/lib/api/resources/users-api';
+
+type ApiUser = UserSummary & {
+  bio?: string | null;
+  locationLabel?: string | null;
+};
 
 export async function getPostComposerData() {
   const sessionUser = getCachedSession()?.user;
-  const trails = await trailsApi
-    .list<Trail>()
-    .then((items) => items.map(mapTrailToSummary))
-    .catch(() => []);
-  const composerUser: UserSummary = sessionUser
+
+  if (!sessionUser) {
+    throw new Error('No signed-in user is available for post creation.');
+  }
+
+  const [allTrails, favoriteTrails, backendUser] = await Promise.all([
+    trailsApi.list<Trail>().then((items) => items.map(mapTrailToSummary)),
+    usersApi.listTrails<Trail>(sessionUser.id).then((items) => items.map(mapTrailToSummary)),
+    usersApi.getById<ApiUser>(sessionUser.id).catch(() => null),
+  ]);
+
+  const composerUser: UserSummary = backendUser
     ? {
+        id: backendUser.id,
+        username: backendUser.username,
+        displayName: backendUser.displayName,
+        avatarUrl: backendUser.avatarUrl ?? null,
+      }
+    : {
         id: sessionUser.id,
         username: sessionUser.username,
         displayName: sessionUser.displayName,
         avatarUrl: sessionUser.avatarUrl ?? null,
-      }
-    : localMockUser;
-  const allTrails = trails.length > 0 ? trails : mockTrails;
-  const favoriteTrailIds = await getFavoriteTrailIds(composerUser.id);
+      };
 
   return {
     users: [composerUser],
     trails: allTrails,
-    favoriteTrailIds,
+    favoriteTrailIds: favoriteTrails.map((trail) => trail.id),
   };
 }

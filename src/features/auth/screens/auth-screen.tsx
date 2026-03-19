@@ -6,23 +6,24 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  StyleSheet,
   TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAuthSession } from '@/features/auth/hooks/use-auth-session';
-import { colors } from '@/shared/theme/colors';
+import { authScreenStyles as styles } from '@/features/auth/screens/auth-screen.styles';
 import { AppText } from '@/shared/ui/app-text';
 
 const loginSchema = z.object({
-  email: z.email('Enter a valid email address.').trim(),
+  identity: z.string().trim().min(1, 'Enter your username.'),
   password: z.string().min(8, 'Password must be at least 8 characters.'),
 });
 
-const registerSchema = loginSchema.extend({
+const registerSchema = z.object({
   displayName: z.string().trim().min(2, 'Display name must be at least 2 characters.'),
+  email: z.email().trim().toLowerCase(),
+  password: z.string().min(8, 'Password must be at least 8 characters.'),
 });
 
 const socialProviders = [
@@ -37,7 +38,7 @@ type AuthScreenProps = {
 export function AuthScreen({ mode }: AuthScreenProps) {
   const { signInWithPassword, registerWithPassword } = useAuthSession();
   const [displayName, setDisplayName] = useState('');
-  const [email, setEmail] = useState('');
+  const [identity, setIdentity] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -48,7 +49,7 @@ export function AuthScreen({ mode }: AuthScreenProps) {
   const title = isLogin ? 'NEW LOGIN' : 'TRAILBLAZER';
   const headline = isLogin ? 'Welcome back' : 'JOIN THE PACK';
   const subtitle = isLogin
-    ? 'Use the account you created on this device to keep posting, tracking, and saving trails.'
+    ? 'Sign in with your backend account to keep posting, tracking, and saving trails.'
     : 'Create your rider profile to start tracking.';
   const submitLabel = isLogin ? 'SIGN IN' : 'CREATE ACCOUNT';
   const footerLabel = isLogin ? "Don't have an account?" : 'Already have an account?';
@@ -58,8 +59,8 @@ export function AuthScreen({ mode }: AuthScreenProps) {
   const helperCopy = useMemo(
     () =>
       isLogin
-        ? 'Use the account you created on this device. Your backend does not expose auth endpoints yet, so this flow keeps a secure local session on top of your backend user record.'
-        : 'Create a TrailBlazer account backed by the existing users API. The token and provider structure is ready for real JWT auth plus Google and Apple later.',
+        ? 'This sign-in uses the backend auth API and stores the returned bearer token securely on the device.'
+        : 'Create a TrailBlazer account through the backend auth API. The session is stored securely and sent as a bearer token on authenticated requests.',
     [isLogin]
   );
 
@@ -69,8 +70,11 @@ export function AuthScreen({ mode }: AuthScreenProps) {
       setIsSubmitting(true);
 
       if (isLogin) {
-        const parsed = loginSchema.parse({ email, password });
-        await signInWithPassword(parsed);
+        const parsed = loginSchema.parse({ identity, password });
+        await signInWithPassword({
+          username: parsed.identity,
+          password: parsed.password,
+        });
       } else {
         if (password !== confirmPassword) {
           throw new Error('Password and confirmation must match.');
@@ -80,7 +84,7 @@ export function AuthScreen({ mode }: AuthScreenProps) {
           throw new Error('Accept the Terms of Service and Privacy Policy to continue.');
         }
 
-        const parsed = registerSchema.parse({ displayName, email, password });
+        const parsed = registerSchema.parse({ displayName, email: identity, password });
         await registerWithPassword(parsed);
       }
 
@@ -151,16 +155,16 @@ export function AuthScreen({ mode }: AuthScreenProps) {
             ) : null}
 
             <View style={styles.inputBlock}>
-              <AppText style={styles.inputLabel}>EMAIL ADDRESS</AppText>
+              <AppText style={styles.inputLabel}>{isLogin ? 'USERNAME' : 'EMAIL ADDRESS'}</AppText>
               <TextInput
                 autoCapitalize="none"
                 autoCorrect={false}
-                keyboardType="email-address"
-                onChangeText={setEmail}
-                placeholder={isLogin ? 'rider@leapxdirt.com' : 'COCKPIT@APEXDIRT.COM'}
+                keyboardType={isLogin ? 'default' : 'email-address'}
+                onChangeText={setIdentity}
+                placeholder={isLogin ? 'auth-user' : 'COCKPIT@APEXDIRT.COM'}
                 placeholderTextColor="#796A72"
                 style={styles.input}
-                value={email}
+                value={identity}
               />
             </View>
 
@@ -251,269 +255,3 @@ export function AuthScreen({ mode }: AuthScreenProps) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#181A17',
-  },
-  keyboardArea: {
-    flex: 1,
-  },
-  shell: {
-    flex: 1,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-    justifyContent: 'center',
-    backgroundColor: '#181A17',
-  },
-  glowTop: {
-    position: 'absolute',
-    top: 32,
-    left: 36,
-    right: 36,
-    height: 180,
-    borderRadius: 90,
-    backgroundColor: 'rgba(95, 138, 73, 0.1)',
-  },
-  card: {
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#3A3C37',
-    backgroundColor: '#232522',
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-    gap: 16,
-  },
-  registerCard: {
-    borderColor: '#6A59FF',
-    paddingHorizontal: 18,
-    paddingVertical: 22,
-  },
-  logoBlock: {
-    alignItems: 'center',
-    gap: 6,
-    paddingBottom: 8,
-  },
-  registerLogoBlock: {
-    alignItems: 'flex-start',
-    paddingBottom: 0,
-  },
-  logoMark: {
-    flexDirection: 'row',
-    gap: 4,
-    alignItems: 'flex-end',
-  },
-  logoMarkColumn: {
-    width: 5,
-    height: 20,
-    borderRadius: 4,
-    backgroundColor: colors.accent,
-  },
-  logoWordmark: {
-    fontSize: 32,
-    lineHeight: 36,
-    fontWeight: '900',
-    letterSpacing: -0.8,
-  },
-  registerWordmark: {
-    fontSize: 20,
-    lineHeight: 24,
-    fontWeight: '900',
-    fontStyle: 'italic',
-    letterSpacing: -0.5,
-  },
-  logoWordmarkWhite: {
-    color: '#F4F1EC',
-  },
-  logoWordmarkAccent: {
-    color: colors.accent,
-  },
-  logoTagline: {
-    color: '#9E9489',
-    fontSize: 10,
-    lineHeight: 14,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    textAlign: 'center',
-  },
-  headerRow: {
-    alignItems: 'center',
-  },
-  registerHeaderRow: {
-    alignItems: 'flex-start',
-    gap: 6,
-  },
-  headerTitle: {
-    color: '#EDE7DF',
-    fontSize: 15,
-    lineHeight: 18,
-    fontWeight: '900',
-  },
-  registerHeadline: {
-    fontSize: 24,
-    lineHeight: 28,
-    textTransform: 'uppercase',
-  },
-  helperCopy: {
-    color: '#A39A8F',
-    fontSize: 12,
-    lineHeight: 17,
-  },
-  registerSubtitle: {
-    color: '#B3A89A',
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  inputBlock: {
-    gap: 8,
-  },
-  inputLabel: {
-    color: '#E0D9CF',
-    fontSize: 11,
-    lineHeight: 14,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  passwordHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  passwordHint: {
-    color: colors.accent,
-    fontSize: 10,
-    lineHeight: 12,
-    fontWeight: '800',
-  },
-  input: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#353733',
-    backgroundColor: '#2A2C29',
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    color: '#F4F1EC',
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  errorText: {
-    color: '#FFB99A',
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  termsRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-  },
-  checkbox: {
-    width: 14,
-    height: 14,
-    marginTop: 2,
-    borderWidth: 1,
-    borderColor: '#6F6A63',
-    backgroundColor: '#2A2C29',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxActive: {
-    borderColor: colors.accent,
-    backgroundColor: '#332416',
-  },
-  checkboxDot: {
-    width: 8,
-    height: 8,
-    backgroundColor: colors.accent,
-  },
-  termsText: {
-    flex: 1,
-    color: '#A39A8F',
-    fontSize: 11,
-    lineHeight: 16,
-  },
-  termsLink: {
-    color: '#E7DDD0',
-  },
-  submitButton: {
-    borderRadius: 12,
-    backgroundColor: '#FF9B5A',
-    paddingVertical: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#FF8A33',
-    shadowOpacity: 0.32,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
-  },
-  submitButtonDisabled: {
-    opacity: 0.7,
-  },
-  submitLabel: {
-    color: '#130A25',
-    fontSize: 14,
-    lineHeight: 16,
-    fontWeight: '900',
-  },
-  dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#3B3D38',
-  },
-  dividerLabel: {
-    color: '#8B8178',
-    fontSize: 10,
-    lineHeight: 12,
-    fontWeight: '700',
-  },
-  socialRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  socialButton: {
-    flex: 1,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#353733',
-    backgroundColor: '#2A2C29',
-    paddingVertical: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2,
-  },
-  socialLabel: {
-    color: '#F4F1EC',
-    fontSize: 13,
-    lineHeight: 16,
-    fontWeight: '800',
-  },
-  socialStatus: {
-    color: '#8F857B',
-    fontSize: 10,
-    lineHeight: 12,
-    fontWeight: '700',
-  },
-  footerRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-    paddingTop: 4,
-  },
-  footerLabel: {
-    color: '#A39A8F',
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  footerAction: {
-    color: colors.accent,
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: '800',
-  },
-});

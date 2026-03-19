@@ -1,53 +1,66 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 
 import { authApi } from '@/features/auth/api/auth-api';
 import { useAuthSession } from '@/features/auth/hooks/use-auth-session';
 import { AuthScreen } from '@/features/auth/screens/auth-screen';
-import { usersApi } from '@/shared/lib/api/resources/users-api';
+import { apiGet, apiPost } from '@/shared/lib/api/api-client';
 
-jest.mock('@/shared/lib/api/resources/users-api', () => ({
-  usersApi: {
-    list: jest.fn(),
-    create: jest.fn(),
-    getById: jest.fn(),
-  },
+jest.mock('@/shared/lib/api/api-client', () => ({
+  apiGet: jest.fn(),
+  apiPost: jest.fn(),
 }));
 
 jest.mock('@/features/auth/hooks/use-auth-session', () => ({
   useAuthSession: jest.fn(),
 }));
 
-const mockedUsersApi = usersApi as jest.Mocked<typeof usersApi>;
+const mockedApiPost = apiPost as jest.MockedFunction<typeof apiPost>;
+const mockedApiGet = apiGet as jest.MockedFunction<typeof apiGet>;
 const mockedUseAuthSession = useAuthSession as jest.Mock;
 const mockedRouter = router as unknown as {
   replace: jest.Mock;
 };
 
 describe('auth api and screens', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.clearAllMocks();
-    await SecureStore.deleteItemAsync('trailblazer.auth.session');
-    await SecureStore.deleteItemAsync('trailblazer.auth.credentials');
     mockedRouter.replace.mockReset();
   });
 
-  it('registers against backend users and then logs in with stored credentials', async () => {
-    mockedUsersApi.list.mockResolvedValue([]);
-    mockedUsersApi.create.mockResolvedValue({
-      id: '11111111-1111-4111-8111-111111111111',
-      username: 'alex',
-      displayName: 'Alex Rider',
-      avatarUrl: null,
-    });
-    mockedUsersApi.getById.mockResolvedValue({
-      id: '11111111-1111-4111-8111-111111111111',
-      username: 'alex',
-      displayName: 'Alex Rider',
-      avatarUrl: null,
-    });
+  it('registers and logs in against backend auth endpoints', async () => {
+    mockedApiPost
+      .mockResolvedValueOnce({
+        accessToken: 'register_token',
+        tokenType: 'bearer',
+        expiresAt: '2026-03-19T12:00:00Z',
+        user: {
+          id: '11111111-1111-4111-8111-111111111111',
+          username: 'alex',
+          displayName: 'Alex Rider',
+          bio: null,
+          avatarUrl: null,
+          locationLabel: null,
+          createdAt: '2026-03-19T11:00:00Z',
+          updatedAt: '2026-03-19T11:00:00Z',
+        },
+      } as never)
+      .mockResolvedValueOnce({
+        accessToken: 'login_token',
+        tokenType: 'bearer',
+        expiresAt: '2026-03-19T12:00:00Z',
+        user: {
+          id: '11111111-1111-4111-8111-111111111111',
+          username: 'alex',
+          displayName: 'Alex Rider',
+          bio: null,
+          avatarUrl: null,
+          locationLabel: null,
+          createdAt: '2026-03-19T11:00:00Z',
+          updatedAt: '2026-03-19T11:00:00Z',
+        },
+      } as never);
 
     const registeredSession = await authApi.register({
       displayName: 'Alex Rider',
@@ -55,20 +68,54 @@ describe('auth api and screens', () => {
       password: 'supersecure',
     });
 
-    expect(mockedUsersApi.create).toHaveBeenCalledWith({
-      username: 'alex',
-      displayName: 'Alex Rider',
-    });
-    expect(registeredSession.user.email).toBe('alex@trailblazer.app');
-    expect(registeredSession.accessToken).toContain('atk_');
+    expect(mockedApiPost).toHaveBeenNthCalledWith(
+      1,
+      '/auth/register',
+      {
+        username: 'alex',
+        displayName: 'Alex Rider',
+        email: 'alex@trailblazer.app',
+        password: 'supersecure',
+      }
+    );
+    expect(registeredSession.accessToken).toBe('register_token');
+    expect(registeredSession.user.username).toBe('alex');
 
     const loggedInSession = await authApi.login({
-      email: 'alex@trailblazer.app',
+      username: 'alex',
       password: 'supersecure',
     });
 
-    expect(mockedUsersApi.getById).toHaveBeenCalledWith('11111111-1111-4111-8111-111111111111');
-    expect(loggedInSession.user.username).toBe('alex');
+    expect(mockedApiPost).toHaveBeenNthCalledWith(
+      2,
+      '/auth/login',
+      {
+        username: 'alex',
+        password: 'supersecure',
+      }
+    );
+    expect(loggedInSession.accessToken).toBe('login_token');
+  });
+
+  it('hydrates the current user and logs out through backend auth endpoints', async () => {
+    mockedApiGet.mockResolvedValue({
+      id: '11111111-1111-4111-8111-111111111111',
+      username: 'alex',
+      displayName: 'Alex Rider',
+      bio: null,
+      avatarUrl: null,
+      locationLabel: null,
+      createdAt: '2026-03-19T11:00:00Z',
+      updatedAt: '2026-03-19T11:00:00Z',
+    } as never);
+    mockedApiPost.mockResolvedValue({} as never);
+
+    const currentUser = await authApi.getMe();
+    expect(mockedApiGet).toHaveBeenCalledWith('/auth/me');
+    expect(currentUser.username).toBe('alex');
+
+    await authApi.logout();
+    expect(mockedApiPost).toHaveBeenCalledWith('/auth/logout');
   });
 
   it('submits the login screen and navigates into tabs', async () => {
@@ -81,13 +128,13 @@ describe('auth api and screens', () => {
 
     const { getByPlaceholderText, getByText } = render(<AuthScreen mode="login" />);
 
-    fireEvent.changeText(getByPlaceholderText('rider@leapxdirt.com'), 'alex@trailblazer.app');
+    fireEvent.changeText(getByPlaceholderText('auth-user'), 'auth-user');
     fireEvent.changeText(getByPlaceholderText('********'), 'supersecure');
     fireEvent.press(getByText('SIGN IN'));
 
     await waitFor(() =>
       expect(signInWithPassword).toHaveBeenCalledWith({
-        email: 'alex@trailblazer.app',
+        username: 'auth-user',
         password: 'supersecure',
       })
     );

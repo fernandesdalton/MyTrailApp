@@ -1,0 +1,238 @@
+import { StyleSheet } from 'react-native';
+
+import { colors } from '@/shared/theme/colors';
+
+export const trailsScreenStyles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  content: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 28,
+    gap: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  eyebrow: {
+    color: colors.accent,
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: '800',
+    letterSpacing: 0.9,
+  },
+  title: {
+    color: colors.text,
+    marginTop: 4,
+  },
+  subtitle: {
+    color: colors.textMuted,
+    marginTop: 4,
+    maxWidth: 260,
+  },
+  favoriteCounter: {
+    width: 62,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceStrong,
+    alignItems: 'center',
+    paddingVertical: 10,
+    gap: 2,
+  },
+  favoriteCounterValue: {
+    color: colors.accent,
+    fontSize: 20,
+    lineHeight: 22,
+    fontWeight: '800',
+  },
+  favoriteCounterLabel: {
+    color: colors.textMuted,
+    fontSize: 10,
+    lineHeight: 12,
+    fontWeight: '800',
+  },
+  rangeCard: {
+    gap: 12,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#3C2B1A',
+    backgroundColor: '#17120F',
+    paddingHorizontal: 14,
+    paddingVertical: 16,
+  },
+  rangeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  rangeLabel: {
+    color: '#8D7A66',
+    fontSize: 10,
+    lineHeight: 12,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  rangeValue: {
+    color: colors.text,
+    fontSize: 30,
+    lineHeight: 34,
+    fontWeight: '900',
+  },
+  resultBadge: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: '#231B16',
+    borderWidth: 1,
+    borderColor: '#3C2B1A',
+  },
+  resultBadgeLabel: {
+    color: colors.accent,
+    fontSize: 10,
+    lineHeight: 12,
+    fontWeight: '800',
+  },
+  scaleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  scaleLabel: {
+    color: '#6F655F',
+    fontSize: 10,
+    lineHeight: 12,
+    fontWeight: '700',
+  },
+  list: {
+    gap: 14,
+  },
+  trailCard: {
+    borderRadius: 22,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#2B221C',
+    backgroundColor: '#13100D',
+  },
+  trailImageWrap: {
+    minHeight: 228,
+    justifyContent: 'space-between',
+    padding: 14,
+  },
+  trailImage: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  trailOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(10, 8, 6, 0.42)',
+  },
+  trailTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  distancePill: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(17, 13, 9, 0.82)',
+    borderWidth: 1,
+    borderColor: '#5C4126',
+  },
+  distancePillText: {
+    color: '#F8EEDF',
+    fontSize: 10,
+    lineHeight: 12,
+    fontWeight: '800',
+  },
+  actionColumn: {
+    gap: 8,
+  },
+  actionButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(17, 13, 9, 0.82)',
+    borderWidth: 1,
+    borderColor: '#4B3A2C',
+  },
+  actionButtonActive: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
+  },
+  actionLabel: {
+    color: colors.text,
+    fontSize: 14,
+    lineHeight: 14,
+    fontWeight: '800',
+  },
+  actionLabelActive: {
+    color: '#130A25',
+  },
+  trailBottom: {
+    gap: 4,
+    marginTop: 'auto',
+  },
+  trailTitle: {
+    color: '#FFF4E9',
+    fontSize: 22,
+    lineHeight: 26,
+    fontWeight: '900',
+  },
+  trailRegion: {
+    color: '#D7C3AF',
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  trailStats: {
+    flexDirection: 'row',
+    gap: 1,
+    backgroundColor: '#0F0D0B',
+  },
+  trailStat: {
+    flex: 1,
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: '#171310',
+  },
+  trailStatLabel: {
+    color: '#7D6F63',
+    fontSize: 10,
+    lineHeight: 12,
+    fontWeight: '800',
+  },
+  trailStatValue: {
+    color: '#F7EFE5',
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '800',
+  },
+  emptyCard: {
+    gap: 6,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#3C2B1A',
+    backgroundColor: '#1A1511',
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+  },
+  emptyTitle: {
+    color: colors.text,
+    fontSize: 15,
+    lineHeight: 18,
+    fontWeight: '700',
+  },
+  emptyCopy: {
+    color: colors.textMuted,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+});

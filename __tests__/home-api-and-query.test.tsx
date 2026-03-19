@@ -28,29 +28,59 @@ describe('home feed api and query', () => {
   });
 
   it('returns api feed data when request succeeds', async () => {
-    apiGetMock.mockResolvedValue([
-      {
-        id: '99999999-9999-4999-8999-999999999999',
-        caption: 'Trail day',
-        createdAt: new Date().toISOString(),
-        media: [{ type: 'image', url: 'https://example.com/feed.jpg', width: 1200, height: 1500 }],
-        likesCount: 3,
-        commentsCount: 1,
-        isLiked: false,
-        author: {
-          id: '11111111-1111-4111-8111-111111111111',
-          username: 'dusty',
-          displayName: 'Dusty Rider',
-        },
-        trail: {
-          id: '22222222-2222-4222-8222-222222222222',
-          title: 'Dusty Loop',
-          distanceMeters: 10200,
-          durationSeconds: 5400,
-          elevationGainMeters: 320,
-        },
-      },
-    ]);
+    apiGetMock.mockImplementation(async (path: string) => {
+      if (path === '/posts') {
+        return [
+          {
+            id: '99999999-9999-4999-8999-999999999999',
+            authorId: '11111111-1111-4111-8111-111111111111',
+            trailId: '22222222-2222-4222-8222-222222222222',
+            caption: 'Trail day',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            media: [{ type: 'image', url: 'https://example.com/feed.jpg', width: 1200, height: 1500 }],
+            likesCount: 3,
+            commentsCount: 1,
+            visibility: 'public',
+          },
+        ];
+      }
+
+      if (path === '/users') {
+        return [
+          {
+            id: '11111111-1111-4111-8111-111111111111',
+            username: 'dusty',
+            displayName: 'Dusty Rider',
+          },
+        ];
+      }
+
+      if (path === '/trails') {
+        return [
+          {
+            id: '22222222-2222-4222-8222-222222222222',
+            ownerId: '11111111-1111-4111-8111-111111111111',
+            title: 'Dusty Loop',
+            slug: 'dusty-loop',
+            description: null,
+            coverImageUrl: null,
+            distanceMeters: 10200,
+            durationSeconds: 5400,
+            elevationGainMeters: 320,
+            routePath: [],
+            startPoint: { latitude: 1, longitude: 1 },
+            endPoint: { latitude: 2, longitude: 2 },
+            regionLabel: null,
+            visibility: 'public',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        ];
+      }
+
+      return [];
+    });
     await expect(getFeedPosts()).resolves.toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -62,23 +92,35 @@ describe('home feed api and query', () => {
     );
   });
 
-  it('falls back to local feed data when request fails', async () => {
+  it('throws when feed request fails', async () => {
     apiGetMock.mockRejectedValue(new Error('offline'));
-    const posts = await getFeedPosts();
-    expect(posts).toHaveLength(3);
-    expect(posts[0]?.trailName).toBeTruthy();
+    await expect(getFeedPosts()).rejects.toThrow('offline');
   });
 
   it('returns story feed data when request succeeds', async () => {
-    apiGetMock.mockResolvedValue([
-      {
-        id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
-        author: {
-          id: '11111111-1111-4111-8111-111111111111',
-          displayName: 'Dusty Rider',
-        },
-      },
-    ]);
+    apiGetMock.mockImplementation(async (path: string) => {
+      if (path === '/stories/all') {
+        return [
+          {
+            id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+            authorId: '11111111-1111-4111-8111-111111111111',
+            createdAt: new Date().toISOString(),
+            expiresAt: new Date().toISOString(),
+          },
+        ];
+      }
+
+      if (path === '/users') {
+        return [
+          {
+            id: '11111111-1111-4111-8111-111111111111',
+            displayName: 'Dusty Rider',
+          },
+        ];
+      }
+
+      return [];
+    });
 
     await expect(getHomeStories()).resolves.toEqual([
       {
@@ -89,37 +131,65 @@ describe('home feed api and query', () => {
     ]);
   });
 
-  it('falls back to local stories when story request fails', async () => {
+  it('throws when story request fails', async () => {
     apiGetMock.mockRejectedValue(new Error('offline'));
-    const stories = await getHomeStories();
-    expect(stories).toHaveLength(4);
-    expect(stories[0]?.label).toBeTruthy();
+    await expect(getHomeStories()).rejects.toThrow('offline');
   });
 
   it('runs the feed query hook successfully', async () => {
-    apiGetMock.mockResolvedValue([
-      {
-        id: '99999999-9999-4999-8999-999999999999',
-        caption: 'Trail day',
-        createdAt: new Date().toISOString(),
-        media: [{ type: 'image', url: 'https://example.com/feed.jpg', width: 1200, height: 1500 }],
-        likesCount: 3,
-        commentsCount: 1,
-        isLiked: false,
-        author: {
-          id: '11111111-1111-4111-8111-111111111111',
-          username: 'dusty',
-          displayName: 'Dusty Rider',
-        },
-        trail: {
-          id: '22222222-2222-4222-8222-222222222222',
-          title: 'Trail',
-          distanceMeters: 1000,
-          durationSeconds: 900,
-          elevationGainMeters: 50,
-        },
-      },
-    ]);
+    apiGetMock.mockImplementation(async (path: string) => {
+      if (path === '/posts') {
+        return [
+          {
+            id: '99999999-9999-4999-8999-999999999999',
+            authorId: '11111111-1111-4111-8111-111111111111',
+            trailId: '22222222-2222-4222-8222-222222222222',
+            caption: 'Trail day',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            media: [{ type: 'image', url: 'https://example.com/feed.jpg', width: 1200, height: 1500 }],
+            likesCount: 3,
+            commentsCount: 1,
+            visibility: 'public',
+          },
+        ];
+      }
+
+      if (path === '/users') {
+        return [
+          {
+            id: '11111111-1111-4111-8111-111111111111',
+            username: 'dusty',
+            displayName: 'Dusty Rider',
+          },
+        ];
+      }
+
+      if (path === '/trails') {
+        return [
+          {
+            id: '22222222-2222-4222-8222-222222222222',
+            ownerId: '11111111-1111-4111-8111-111111111111',
+            title: 'Trail',
+            slug: 'trail',
+            description: null,
+            coverImageUrl: null,
+            distanceMeters: 1000,
+            durationSeconds: 900,
+            elevationGainMeters: 50,
+            routePath: [],
+            startPoint: { latitude: 1, longitude: 1 },
+            endPoint: { latitude: 2, longitude: 2 },
+            regionLabel: null,
+            visibility: 'public',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        ];
+      }
+
+      return [];
+    });
     const queryClient = new QueryClient({
       defaultOptions: {
         queries: {

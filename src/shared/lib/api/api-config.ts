@@ -1,42 +1,67 @@
-import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
 const explicitBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.trim();
+const selectedEnvironment = process.env.EXPO_PUBLIC_APP_ENV?.trim().toLowerCase() || 'local';
 
-function getExpoHost() {
-  const hostUri =
-    Constants.expoConfig?.hostUri ??
-    Constants.expoGoConfig?.debuggerHost ??
-    null;
-
-  if (!hostUri) {
-    return null;
-  }
-
-  return hostUri.split(':')[0] ?? null;
-}
+const baseUrlsByEnvironment = {
+  local: process.env.EXPO_PUBLIC_API_BASE_URL_LOCAL?.trim() || 'http://127.0.0.1:8000',
+  dev:
+    process.env.EXPO_PUBLIC_API_BASE_URL_DEV?.trim() ||
+    'http://my-trail-app-dev-alb-1467436399.us-east-1.elb.amazonaws.com',
+  production: process.env.EXPO_PUBLIC_API_BASE_URL_PRODUCTION?.trim() || '',
+} as const;
 
 function resolveBaseUrl() {
   if (explicitBaseUrl) {
-    return explicitBaseUrl;
+    return normalizeBaseUrl(explicitBaseUrl);
   }
 
-  if (Platform.OS === 'android') {
-    const expoHost = getExpoHost();
-    return expoHost ? `http://${expoHost}:8000` : 'http://10.0.2.2:8000';
+  return normalizeBaseUrl(
+    baseUrlsByEnvironment[selectedEnvironment as keyof typeof baseUrlsByEnvironment] ?? ''
+  );
+}
+
+function normalizeBaseUrl(baseUrl: string) {
+  if (!baseUrl) {
+    return '';
   }
 
-  return 'http://127.0.0.1:8000';
+  if (Platform.OS !== 'android') {
+    return baseUrl;
+  }
+
+  return baseUrl
+    .replace('http://127.0.0.1', 'http://10.0.2.2')
+    .replace('http://localhost', 'http://10.0.2.2');
+}
+
+function requireBaseUrl() {
+  const baseUrl = resolveBaseUrl();
+
+  if (baseUrl) {
+    return baseUrl;
+  }
+
+  throw new Error(
+    `API base URL is not configured for environment "${selectedEnvironment}". ` +
+      'Set EXPO_PUBLIC_API_BASE_URL or provide the matching EXPO_PUBLIC_API_BASE_URL_<ENV> value.'
+  );
 }
 
 export const apiConfig = {
+  environment: selectedEnvironment,
   baseUrl: resolveBaseUrl(),
   prefix: '/api/v1',
-  docsUrl: `${resolveBaseUrl()}/docs`,
-  openApiUrl: `${resolveBaseUrl()}/openapi.json`,
+  docsUrl: apiConfigUrl('/docs'),
+  openApiUrl: apiConfigUrl('/openapi.json'),
 } as const;
+
+function apiConfigUrl(path: string) {
+  const baseUrl = resolveBaseUrl();
+  return baseUrl ? `${baseUrl}${path}` : '';
+}
 
 export function buildApiUrl(path: string) {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  return `${apiConfig.baseUrl}${apiConfig.prefix}${normalizedPath}`;
+  return `${requireBaseUrl()}${apiConfig.prefix}${normalizedPath}`;
 }

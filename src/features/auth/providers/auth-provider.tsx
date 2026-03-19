@@ -38,9 +38,40 @@ export function AuthProvider({ children }: PropsWithChildren) {
           return;
         }
 
-        setSession(storedSession);
+        if (!storedSession) {
+          setSession(null);
+          setCachedSession(null);
+          setStatus('unauthenticated');
+          return;
+        }
+
         setCachedSession(storedSession);
-        setStatus(storedSession ? 'authenticated' : 'unauthenticated');
+
+        try {
+          const user = await authApi.getMe();
+          const hydratedSession = {
+            ...storedSession,
+            user,
+          };
+
+          if (!isMounted) {
+            return;
+          }
+
+          await setStoredSession(hydratedSession);
+          setSession(hydratedSession);
+          setCachedSession(hydratedSession);
+          setStatus('authenticated');
+        } catch {
+          if (!isMounted) {
+            return;
+          }
+
+          await clearStoredSession();
+          setSession(null);
+          setCachedSession(null);
+          setStatus('unauthenticated');
+        }
       } catch {
         if (!isMounted) {
           return;
@@ -78,6 +109,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
         await queryClient.invalidateQueries();
       },
       async signOut() {
+        try {
+          await authApi.logout();
+        } catch {
+          // Always clear the local session, even if logout fails remotely.
+        }
         await clearStoredSession();
         setCachedSession(null);
         setSession(null);

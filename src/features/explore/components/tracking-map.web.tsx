@@ -1,7 +1,7 @@
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
-import { colors } from '@/shared/theme/colors';
+import { trackingMapWebStyles as styles } from '@/features/explore/components/tracking-map.web.styles';
 import { AppText } from '@/shared/ui/app-text';
 
 export function TrackingMapScreen() {
@@ -17,19 +17,3 @@ export function TrackingMapScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#E8F0E8',
-    padding: 16
-  },
-  card: {
-    gap: 12,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: '#FFFFFF',
-    padding: 20
-  }
-});

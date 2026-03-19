@@ -4,10 +4,8 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import type MapboxModuleType from '@rnmapbox/maps';
 
-import {
-  currentLocationMapStyles as styles,
-  MapNoticeCard,
-} from '@/features/home/components/current-location-map.shared';
+import { currentLocationMapStyles as styles } from '@/features/home/components/current-location-map.shared.styles';
+import { MapNoticeCard } from '@/features/home/components/current-location-map.shared';
 import { colors } from '@/shared/theme/colors';
 import { AppText } from '@/shared/ui/app-text';
 

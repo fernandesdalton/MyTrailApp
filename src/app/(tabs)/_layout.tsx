@@ -1,9 +1,11 @@
 import { Redirect, Tabs } from 'expo-router';
+import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { type ComponentProps } from 'react';
 import { View } from 'react-native';
 
 import { useAuthSession } from '@/features/auth/hooks/use-auth-session';
+import { tabsLayoutStyles as styles } from '@/features/navigation/styles/tabs-layout.styles';
 import { AppText } from '@/shared/ui/app-text';
 import { colors } from '@/shared/theme/colors';
 
@@ -13,8 +15,40 @@ type TabBarIconProps = {
   name: ComponentProps<typeof SymbolView>['name'];
 };
 
+type ProfileTabIconProps = {
+  avatarUrl?: string | null;
+  displayName?: string;
+  focused: boolean;
+};
+
 function TabBarIcon({ color, focused, name }: TabBarIconProps) {
   return <SymbolView name={name} tintColor={color} size={focused ? 22 : 20} />;
+}
+
+function ProfileTabIcon({ avatarUrl, displayName, focused }: ProfileTabIconProps) {
+  const size = focused ? 26 : 24;
+
+  return (
+    <View
+      style={[
+        styles.profileIcon,
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: focused ? colors.accent : colors.surface,
+          borderColor: focused ? colors.accent : colors.border,
+        },
+      ]}>
+      {avatarUrl ? (
+        <Image source={avatarUrl} style={styles.profileAvatarImage} contentFit="cover" />
+      ) : (
+        <AppText style={[styles.profileInitial, { color: focused ? '#130A25' : colors.text }]}>
+          {displayName?.charAt(0).toUpperCase() ?? 'R'}
+        </AppText>
+      )}
+    </View>
+  );
 }
 
 export default function TabsLayout() {
@@ -34,13 +68,7 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarStyle: {
-          backgroundColor: colors.surfaceStrong,
-          borderTopColor: colors.border,
-          height: 68,
-          paddingTop: 8,
-          paddingBottom: 10,
-        },
+        tabBarStyle: styles.tabBar,
       }}>
       <Tabs.Screen
         name="index"
@@ -86,27 +114,11 @@ export default function TabsLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ focused }) => (
-            <View
-              style={{
-                width: focused ? 26 : 24,
-                height: focused ? 26 : 24,
-                borderRadius: 999,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: focused ? colors.accent : colors.surface,
-                borderWidth: 1,
-                borderColor: focused ? colors.accent : colors.border,
-              }}>
-              <AppText
-                style={{
-                  color: focused ? '#130A25' : colors.text,
-                  fontSize: 11,
-                  lineHeight: 12,
-                  fontWeight: '800',
-                }}>
-                {session?.user.displayName?.charAt(0).toUpperCase() ?? 'R'}
-              </AppText>
-            </View>
+            <ProfileTabIcon
+              focused={focused}
+              avatarUrl={session?.user.avatarUrl}
+              displayName={session?.user.displayName}
+            />
           ),
         }}
       />
