@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { router } from 'expo-router';
 import { fireEvent, render } from '@testing-library/react-native';
 import * as Location from 'expo-location';
+import { useScrollToTop } from '@react-navigation/native';
 
 import { useAuthSession } from '@/features/auth/hooks/use-auth-session';
 import { FeedPostCard } from '@/features/home/components/feed-post-card';
@@ -13,23 +14,36 @@ import { HomeScreen } from '@/features/home/screens/home-screen';
 
 jest.mock('@/features/home/queries/use-feed-posts-query', () => ({
   useFeedPostsQuery: jest.fn(() => ({
-    data: [
-      {
-        id: '99999999-9999-4999-8999-999999999999',
-        userName: 'Jake',
-        handle: '@jake',
-        postedAt: 'now',
-        trailName: 'Dusty Loop',
-        distance: '10 km',
-        duration: '1h',
-        elevation: '100 m',
-        likes: 5,
-        comments: 2,
-        caption: 'Great ride',
-        imageUrl: 'https://example.com/image.jpg',
-        avatarColor: '#fff',
-      },
-    ],
+    data: {
+      pages: [
+        {
+          items: [
+            {
+              id: '99999999-9999-4999-8999-999999999999',
+              userName: 'Jake',
+              handle: '@jake',
+              postedAt: 'now',
+              trailName: 'Dusty Loop',
+              distance: '10 km',
+              duration: '1h',
+              elevation: '100 m',
+              likes: 5,
+              comments: 2,
+              caption: 'Great ride',
+              imageUrl: 'https://example.com/image.jpg',
+              avatarColor: '#fff',
+            },
+          ],
+          nextCursor: null,
+          hasMore: false,
+        },
+      ],
+    },
+    fetchNextPage: jest.fn(),
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    isRefetching: false,
+    refetch: jest.fn(),
   })),
 }));
 
@@ -39,11 +53,17 @@ jest.mock('@/features/home/queries/use-home-stories-query', () => ({
       { id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', label: 'You', color: '#FF8A33' },
       { id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd', label: 'Jake', color: '#FFAA6A' },
     ],
+    isRefetching: false,
+    refetch: jest.fn(),
   })),
 }));
 
 jest.mock('@/features/auth/hooks/use-auth-session', () => ({
   useAuthSession: jest.fn(),
+}));
+
+jest.mock('@react-navigation/native', () => ({
+  useScrollToTop: jest.fn(),
 }));
 
 const samplePost: FeedPost = {
@@ -66,6 +86,7 @@ const mockedRouter = router as unknown as {
   push: jest.Mock;
 };
 const mockedUseAuthSession = useAuthSession as jest.Mock;
+const mockedUseScrollToTop = useScrollToTop as jest.Mock;
 const mockedSignOut = jest.fn();
 
 describe('home components and screen', () => {
@@ -86,6 +107,7 @@ describe('home components and screen', () => {
     );
     mockedRouter.push.mockReset();
     mockedSignOut.mockReset();
+    mockedUseScrollToTop.mockReset();
   });
 
   it('renders feed post card content', () => {
@@ -117,7 +139,7 @@ describe('home components and screen', () => {
   it('renders home screen feed and opens create modal then hides composer', () => {
     const { getByTestId, getByText, queryByText } = render(<HomeScreen />);
 
-    expect(getByText('TrailBlazer')).toBeTruthy();
+    expect(getByText('Trailgram')).toBeTruthy();
     expect(getByText('Trail feed')).toBeTruthy();
     expect(getByText("Share today's trail")).toBeTruthy();
     expect(getByText('You')).toBeTruthy();
@@ -126,7 +148,7 @@ describe('home components and screen', () => {
     expect(queryByText("Share today's trail")).toBeNull();
 
     fireEvent.press(getByTestId('open-create-menu'));
-    expect(getByText('Choose what you want to publish in TrailBlazer.')).toBeTruthy();
+    expect(getByText('Choose what you want to publish in Trailgram.')).toBeTruthy();
     fireEvent.press(getByText('New post'));
     expect(mockedRouter.push).toHaveBeenCalledWith('/new-post');
   });

@@ -5,6 +5,9 @@ export type AuthProvider = 'password' | 'google' | 'apple';
 export type AuthUser = UserSummary & {
   bio?: string | null;
   locationLabel?: string | null;
+  followersCount?: number;
+  followingCount?: number;
+  connectionsCount?: number;
   createdAt?: string;
   updatedAt?: string;
   email?: string;

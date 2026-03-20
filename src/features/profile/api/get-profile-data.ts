@@ -5,6 +5,7 @@ import {
   type ProfileData,
   type ProfileUser,
 } from '@/features/profile/model/profile.types';
+import { resolveAssetUrl } from '@/shared/lib/api/asset-url';
 import { mapTrailToSummary, type Trail } from '@/shared/lib/api/resources';
 import { usersApi } from '@/shared/lib/api/resources/users-api';
 
@@ -15,6 +16,9 @@ type ApiUser = {
   bio?: string | null;
   avatarUrl?: string | null;
   locationLabel?: string | null;
+  followersCount?: number;
+  followingCount?: number;
+  connectionsCount?: number;
 };
 
 function mapApiUserToProfileUser(user: ApiUser): ProfileUser {
@@ -22,9 +26,12 @@ function mapApiUserToProfileUser(user: ApiUser): ProfileUser {
     id: user.id,
     username: user.username,
     displayName: user.displayName,
-    avatarUrl: user.avatarUrl ?? null,
+    avatarUrl: resolveAssetUrl(user.avatarUrl),
     bio: user.bio ?? null,
     locationLabel: user.locationLabel ?? null,
+    followersCount: user.followersCount ?? 0,
+    followingCount: user.followingCount ?? 0,
+    connectionsCount: user.connectionsCount ?? 0,
   };
 }
 
@@ -53,9 +60,12 @@ export async function getProfileData(profileUserId?: string): Promise<ProfileDat
         id: targetUserId,
         username: targetUserId === sessionUser.id ? sessionUser.username : 'trailblazer',
         displayName: targetUserId === sessionUser.id ? sessionUser.displayName : 'Trail Rider',
-        avatarUrl: targetUserId === sessionUser.id ? sessionUser.avatarUrl ?? null : null,
+        avatarUrl: targetUserId === sessionUser.id ? resolveAssetUrl(sessionUser.avatarUrl) : null,
         bio: 'Enduro and trail riding enthusiast.',
         locationLabel: null,
+        followersCount: targetUserId === sessionUser.id ? sessionUser.followersCount ?? 0 : 0,
+        followingCount: targetUserId === sessionUser.id ? sessionUser.followingCount ?? 0 : 0,
+        connectionsCount: targetUserId === sessionUser.id ? sessionUser.connectionsCount ?? 0 : 0,
       };
 
   const suggestedUsers = users
@@ -71,7 +81,6 @@ export async function getProfileData(profileUserId?: string): Promise<ProfileDat
     isCurrentUser: targetUserId === sessionUser.id,
     postCount: posts.length,
     favoriteTrailCount: favoriteTrails.length,
-    connectionCount: Math.max(users.length - 1, 0),
     posts: mapPostsToProfileGrid(posts),
     favoriteTrails,
     suggestedUsers,

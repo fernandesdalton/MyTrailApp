@@ -31,11 +31,22 @@ describe('api resources', () => {
   it('maps trail, post, comment, and story endpoints correctly', () => {
     expect(trailsApi.list()).toEqual({ method: 'GET', path: '/trails' });
     expect(trailsApi.getById('t1')).toEqual({ method: 'GET', path: '/trails/t1' });
-    expect(postsApi.list()).toEqual({ method: 'GET', path: '/posts' });
+    expect(postsApi.list({ viewerId: 'u1' })).toEqual({ method: 'GET', path: '/feed?viewerId=u1' });
+    expect(postsApi.list({ viewerId: 'u1', limit: 10, cursor: 'abc' })).toEqual({
+      method: 'GET',
+      path: '/feed?viewerId=u1&limit=10&cursor=abc',
+    });
+    expect(postsApi.uploadPhoto('p1', { file: 'demo' })).toEqual({
+      method: 'POST',
+      path: '/posts/p1/photos/upload',
+      body: { file: 'demo' },
+    });
+    expect(postsApi.listPhotos('p1')).toEqual({ method: 'GET', path: '/posts/p1/photos' });
+    expect(postsApi.listUserPhotos('u1')).toEqual({ method: 'GET', path: '/users/u1/photos' });
     expect(postsApi.getById('p1')).toEqual({ method: 'GET', path: '/posts/p1' });
     expect(commentsApi.listByPost('p1')).toEqual({ method: 'GET', path: '/posts/p1/comments' });
     expect(commentsApi.getById('c1')).toEqual({ method: 'GET', path: '/comments/c1' });
-    expect(storiesApi.list()).toEqual({ method: 'GET', path: '/stories/all' });
+    expect(storiesApi.list({ viewerId: 'u1' })).toEqual({ method: 'GET', path: '/stories?viewerId=u1' });
     expect(storiesApi.getById('s1')).toEqual({ method: 'GET', path: '/stories/s1' });
   });
 

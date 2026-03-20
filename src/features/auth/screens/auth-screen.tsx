@@ -60,7 +60,7 @@ export function AuthScreen({ mode }: AuthScreenProps) {
     () =>
       isLogin
         ? 'This sign-in uses the backend auth API and stores the returned bearer token securely on the device.'
-        : 'Create a TrailBlazer account through the backend auth API. The session is stored securely and sent as a bearer token on authenticated requests.',
+        : 'Create a Trailgram account through the backend auth API. The session is stored securely and sent as a bearer token on authenticated requests.',
     [isLogin]
   );
 

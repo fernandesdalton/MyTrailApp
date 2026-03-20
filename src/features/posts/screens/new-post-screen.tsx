@@ -29,6 +29,12 @@ const sampleMedia: MediaAsset = {
   blurhash: null,
 };
 
+type ComposerMedia = MediaAsset & {
+  fileName?: string | null;
+  mimeType?: string | null;
+  localUri?: string | null;
+};
+
 const visibilityOptions: {
   id: PostVisibility;
   label: string;
@@ -43,7 +49,12 @@ export function NewPostScreen() {
   const { data, isLoading } = usePostComposerDataQuery();
   const createPostMutation = useCreatePostMutation();
   const [caption, setCaption] = useState('');
-  const [selectedMedia, setSelectedMedia] = useState<MediaAsset>(sampleMedia);
+  const [selectedMedia, setSelectedMedia] = useState<ComposerMedia>({
+    ...sampleMedia,
+    fileName: null,
+    mimeType: null,
+    localUri: null,
+  });
   const [selectedTrailId, setSelectedTrailId] = useState<string | null>(null);
   const [selectedAuthorId, setSelectedAuthorId] = useState<string | null>(null);
   const [visibility, setVisibility] = useState<PostVisibility>('public');
@@ -115,6 +126,9 @@ export function NewPostScreen() {
       width: asset.width ?? 1080,
       height: asset.height ?? 1350,
       blurhash: null,
+      fileName: asset.fileName ?? null,
+      mimeType: asset.mimeType ?? null,
+      localUri: asset.uri,
     });
   }
 
@@ -125,25 +139,26 @@ export function NewPostScreen() {
     }
 
     try {
-      const payloadMedia: MediaAsset = {
-        id: '66666666-6666-4666-8666-666666666666',
-        type: 'image',
-        url: 'https://example.com/post.jpg',
-        width: 1080,
-        height: 1350,
-        blurhash: null,
-      };
-
       await createPostMutation.mutateAsync({
         payload: {
           authorId: selectedAuthor.id,
           trailId: selectedTrail?.id ?? null,
           caption: caption.trim() || 'Cloud inversion this morning.',
           visibility,
-          media: [payloadMedia],
+          media: [],
         },
         author: selectedAuthor,
         trail: selectedTrail,
+        photoUpload: selectedMedia.localUri
+          ? {
+              uri: selectedMedia.localUri,
+              width: selectedMedia.width,
+              height: selectedMedia.height,
+              blurhash: selectedMedia.blurhash ?? null,
+              mimeType: selectedMedia.mimeType ?? null,
+              fileName: selectedMedia.fileName ?? null,
+            }
+          : null,
       });
 
       startTransition(() => {
@@ -190,7 +205,16 @@ export function NewPostScreen() {
               <Pressable onPress={() => void handlePickFromGallery()} style={styles.heroActionPrimary}>
                 <AppText style={styles.heroActionPrimaryLabel}>Gallery</AppText>
               </Pressable>
-              <Pressable onPress={() => setSelectedMedia(sampleMedia)} style={styles.heroActionSecondary}>
+              <Pressable
+                onPress={() =>
+                  setSelectedMedia({
+                    ...sampleMedia,
+                    fileName: null,
+                    mimeType: null,
+                    localUri: null,
+                  })
+                }
+                style={styles.heroActionSecondary}>
                 <AppText style={styles.heroActionSecondaryLabel}>Sample</AppText>
               </Pressable>
             </View>
@@ -203,13 +227,13 @@ export function NewPostScreen() {
           <AppText style={styles.sectionLabel}>SELECTED MEDIA</AppText>
           <View style={styles.mediaInfoCard}>
             <AppText style={styles.mediaInfoTitle}>
-              {selectedMedia.url.startsWith('file:') ? 'Picked from your gallery' : 'Using the sample ride photo'}
+              {selectedMedia.localUri ? 'Picked from your gallery' : 'Using the sample ride photo'}
             </AppText>
             <AppText style={styles.mediaInfoMeta}>
               {`${selectedMedia.width} x ${selectedMedia.height}`}
             </AppText>
             <AppText style={styles.mediaInfoDescription}>
-              {selectedMedia.url.startsWith('file:')
+              {selectedMedia.localUri
                 ? 'Your photo is attached and ready for this post.'
                 : 'A temporary sample image is attached until you pick one from your gallery.'}
             </AppText>
@@ -367,7 +391,7 @@ export function NewPostScreen() {
           </View>
           <View style={styles.statCard}>
             <AppText style={styles.statLabel}>MEDIA</AppText>
-            <AppText style={styles.statValue}>{selectedMedia.url.startsWith('file:') ? 'GALLERY' : 'SAMPLE'}</AppText>
+            <AppText style={styles.statValue}>{selectedMedia.localUri ? 'GALLERY' : 'SAMPLE'}</AppText>
           </View>
         </View>
 

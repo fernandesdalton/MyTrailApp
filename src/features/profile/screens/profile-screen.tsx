@@ -1,8 +1,16 @@
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import { Pressable, ScrollView, View, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { useAuthSession } from '@/features/auth/hooks/use-auth-session';
 import { useProfileDataQuery } from '@/features/profile/queries/use-profile-data-query';
@@ -21,7 +29,8 @@ const fallbackTrailImage =
 
 export function ProfileScreen({ userId }: ProfileScreenProps) {
   const { session } = useAuthSession();
-  const { data } = useProfileDataQuery(userId);
+  const queryClient = useQueryClient();
+  const { data, isRefetching, refetch } = useProfileDataQuery(userId);
   const [connectedUserIds, setConnectedUserIds] = useState<string[]>([]);
   const [activeSection, setActiveSection] = useState<'posts' | 'favorites'>('posts');
 
@@ -36,6 +45,9 @@ export function ProfileScreen({ userId }: ProfileScreenProps) {
   const isOwnProfile = data?.isCurrentUser ?? (!userId || userId === session?.user.id);
   const viewedUserIsConnected = connectedUserIds.includes(profileUser.id);
   const profileMode: 'self' | 'visitor' = isOwnProfile ? 'self' : 'visitor';
+  const suggestedUsers = (data?.suggestedUsers ?? []).filter(
+    (suggestedUser) => !connectedUserIds.includes(suggestedUser.id)
+  );
 
   async function handleToggleConnect(targetUserId: string) {
     const viewerId = session?.user.id;
@@ -54,9 +66,30 @@ export function ProfileScreen({ userId }: ProfileScreenProps) {
       } else {
         await socialApi.followUser(targetUserId, viewerId);
       }
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['profile'] }),
+        queryClient.invalidateQueries({ queryKey: ['home', 'feed-posts', viewerId] }),
+        queryClient.invalidateQueries({ queryKey: ['home', 'stories', viewerId] }),
+      ]);
     } catch {
       // Keep the UI responsive while follow persistence evolves.
     }
+  }
+
+  async function handleRefresh() {
+    const viewerId = session?.user.id;
+
+    await Promise.all([
+      refetch(),
+      queryClient.invalidateQueries({ queryKey: ['profile'] }),
+      ...(viewerId
+        ? [
+            queryClient.invalidateQueries({ queryKey: ['home', 'feed-posts', viewerId] }),
+            queryClient.invalidateQueries({ queryKey: ['home', 'stories', viewerId] }),
+          ]
+        : []),
+    ]);
   }
 
   function renderAvatar(size: number, ringStyle?: StyleProp<ViewStyle>) {
@@ -80,7 +113,12 @@ export function ProfileScreen({ userId }: ProfileScreenProps) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={() => void handleRefresh()} />
+        }>
         <View style={styles.hero}>
           <View style={styles.heroTopRow}>
             <Pressable
@@ -121,9 +159,7 @@ export function ProfileScreen({ userId }: ProfileScreenProps) {
                 <AppText style={styles.statLabel}>TRAILS</AppText>
               </View>
               <View style={styles.statItem}>
-                <AppText style={styles.statValue}>
-                  {Math.max(data?.connectionCount ?? 0, 0) + (viewedUserIsConnected ? 1 : 0)}
-                </AppText>
+                <AppText style={styles.statValue}>{profileUser.connectionsCount ?? 0}</AppText>
                 <AppText style={styles.statLabel}>CONNECTIONS</AppText>
               </View>
             </View>
@@ -223,7 +259,7 @@ export function ProfileScreen({ userId }: ProfileScreenProps) {
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.connectRow}>
-                {(data?.suggestedUsers ?? []).map((suggestedUser) => {
+                {suggestedUsers.map((suggestedUser) => {
                   const isConnected = connectedUserIds.includes(suggestedUser.id);
 
                   return (

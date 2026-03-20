@@ -35,6 +35,7 @@ export type ApiFeedPost = {
   caption?: string | null;
   createdAt: string;
   media: MediaAsset[];
+  photos?: MediaAsset[];
   likesCount: number;
   commentsCount: number;
   isLiked: boolean;
@@ -42,12 +43,15 @@ export type ApiFeedPost = {
   trail?: TrailSummary | null;
 };
 
+export type ApiFeedPostItem = ApiFeedPost | ApiPost;
+
 export type ApiPost = {
   id: string;
   authorId: string;
   trailId?: string | null;
   caption?: string | null;
   media: MediaAsset[];
+  photos?: MediaAsset[];
   visibility: PostVisibility;
   likesCount: number;
   commentsCount: number;

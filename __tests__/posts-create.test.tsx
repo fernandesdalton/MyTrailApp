@@ -115,16 +115,7 @@ describe('post creation', () => {
           trailId: '22222222-2222-4222-8222-222222222222',
           caption: 'Sunset dust and perfect grip.',
           visibility: 'public',
-          media: [
-            {
-              id: '66666666-6666-4666-8666-666666666666',
-              type: 'image',
-              url: 'https://example.com/post.jpg',
-              width: 1080,
-              height: 1350,
-              blurhash: null,
-            },
-          ],
+          media: [],
         },
         author: {
           id: '11111111-1111-4111-8111-111111111111',
@@ -138,9 +129,62 @@ describe('post creation', () => {
           durationSeconds: 8100,
           elevationGainMeters: 420,
         }),
+        photoUpload: null,
       })
     );
     expect(mockedRouter.replace).toHaveBeenCalledWith('/(tabs)');
+  });
+
+  it('submits a gallery image by creating the post first and passing photo upload data separately', async () => {
+    const mutateAsync = jest.fn().mockResolvedValue({ id: '88888888-8888-4888-8888-888888888888' } as never);
+    mockedUseCreatePostMutation.mockReturnValue({
+      isPending: false,
+      isSuccess: false,
+      mutateAsync,
+    } as never);
+
+    const { getByPlaceholderText, getByText } = render(<NewPostScreen />);
+
+    fireEvent.press(getByText('Gallery'));
+    await waitFor(() => expect(ImagePicker.launchImageLibraryAsync).toHaveBeenCalled());
+
+    fireEvent.changeText(
+      getByPlaceholderText('Tell the story of the trail...'),
+      'Dusty switchbacks and hero dirt.'
+    );
+    fireEvent.press(getByText('POST'));
+
+    await waitFor(() =>
+      expect(mutateAsync).toHaveBeenCalledWith({
+        payload: {
+          authorId: '11111111-1111-4111-8111-111111111111',
+          trailId: '22222222-2222-4222-8222-222222222222',
+          caption: 'Dusty switchbacks and hero dirt.',
+          visibility: 'public',
+          media: [],
+        },
+        author: {
+          id: '11111111-1111-4111-8111-111111111111',
+          username: 'alex',
+          displayName: 'Alex',
+        },
+        trail: expect.objectContaining({
+          id: '22222222-2222-4222-8222-222222222222',
+          title: 'Black Rock Canyon',
+          distanceMeters: 9600,
+          durationSeconds: 8100,
+          elevationGainMeters: 420,
+        }),
+        photoUpload: {
+          uri: 'file:///mock-gallery-image.jpg',
+          width: 1080,
+          height: 1350,
+          blurhash: null,
+          mimeType: null,
+          fileName: null,
+        },
+      })
+    );
   });
 
   it('loads an image from the phone gallery', async () => {

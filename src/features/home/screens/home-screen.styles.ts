@@ -11,6 +11,7 @@ export const homeScreenStyles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 8,
     paddingBottom: 24,
+    gap: 18,
   },
   container: {
     gap: 18,
@@ -381,6 +382,14 @@ export const homeScreenStyles = StyleSheet.create({
   },
   feedList: {
     gap: 18,
+  },
+  feedItemSpacer: {
+    height: 18,
+  },
+  feedFooter: {
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   bottomSpacer: {
     height: 8,

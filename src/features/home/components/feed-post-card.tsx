@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
-import { type ComponentProps } from 'react';
+import { memo, type ComponentProps } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { type FeedPost } from '@/features/home/model/feed-post.types';
@@ -15,16 +15,16 @@ type FeedActionProps = {
   name: FeedIconName;
 };
 
-function FeedAction({ count, name }: FeedActionProps) {
+const FeedAction = memo(function FeedAction({ count, name }: FeedActionProps) {
   return (
     <View style={styles.action}>
       <SymbolView name={name} tintColor={colors.text} size={18} />
       <AppText style={styles.actionText}>{count}</AppText>
     </View>
   );
-}
+});
 
-export function FeedPostCard({ post }: { post: FeedPost }) {
+export const FeedPostCard = memo(function FeedPostCard({ post }: { post: FeedPost }) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -103,4 +103,4 @@ export function FeedPostCard({ post }: { post: FeedPost }) {
       </View>
     </View>
   );
-}
+});

@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
 import { type AuthSession, type AuthUser, type LoginPayload, type RegisterPayload } from '@/features/auth/model/auth.types';
-import { apiGet, apiPost } from '@/shared/lib/api/api-client';
+import { resolveAssetUrl } from '@/shared/lib/api/asset-url';
+import { ApiError, apiGet, apiPost } from '@/shared/lib/api/api-client';
 
 const loginSchema = z.object({
   username: z.string().trim().min(1, 'Enter your username.'),
@@ -42,12 +43,48 @@ function slugifyUsername(value: string) {
     .slice(0, 30);
 }
 
+function buildUsernameCandidates(payload: z.infer<typeof registerSchema>) {
+  const explicitUsername = payload.username?.trim();
+  if (explicitUsername) {
+    return [explicitUsername];
+  }
+
+  const bases = [
+    slugifyUsername(payload.email.split('@')[0] ?? ''),
+    slugifyUsername(payload.displayName),
+    'trailblazer',
+  ].filter(Boolean);
+  const uniqueBases = [...new Set(bases)];
+  const [primaryBase = 'trailblazer'] = uniqueBases;
+
+  const candidates = uniqueBases.slice(0, 2);
+  for (let index = 1; index <= 4; index += 1) {
+    candidates.push(`${primaryBase}_${Math.floor(1000 + Math.random() * 9000)}`);
+  }
+
+  return [...new Set(candidates.map((candidate) => candidate.slice(0, 30)).filter(Boolean))];
+}
+
+function payloadMentionsEmail(payload: unknown) {
+  if (typeof payload === 'string') {
+    return payload.toLowerCase().includes('email');
+  }
+
+  if (!payload || typeof payload !== 'object') {
+    return false;
+  }
+
+  return Object.values(payload).some(
+    (value) => typeof value === 'string' && value.toLowerCase().includes('email')
+  );
+}
+
 function toAuthUser(user: BackendAuthUser, email?: string): AuthUser {
   return {
     id: user.id,
     username: user.username,
     displayName: user.displayName,
-    avatarUrl: user.avatarUrl ?? null,
+    avatarUrl: resolveAssetUrl(user.avatarUrl),
     bio: user.bio ?? null,
     locationLabel: user.locationLabel ?? null,
     createdAt: user.createdAt,
@@ -70,16 +107,33 @@ function toAuthSession(response: BackendAuthResponse, email?: string): AuthSessi
 export const authApi = {
   async register(payload: RegisterPayload): Promise<AuthSession> {
     const parsed = registerSchema.parse(payload);
-    const username = parsed.username?.trim() || slugifyUsername(parsed.email.split('@')[0] ?? parsed.displayName);
+    const usernameCandidates = buildUsernameCandidates(parsed);
+    let lastError: unknown;
 
-    const response = await apiPost<BackendAuthResponse>('/auth/register', {
-      username,
-      displayName: parsed.displayName,
-      email: parsed.email,
-      password: parsed.password,
-    });
+    for (const username of usernameCandidates) {
+      try {
+        const response = await apiPost<BackendAuthResponse>('/auth/register', {
+          username,
+          displayName: parsed.displayName,
+          email: parsed.email,
+          password: parsed.password,
+        });
 
-    return toAuthSession(response, parsed.email);
+        return toAuthSession(response, parsed.email);
+      } catch (error) {
+        lastError = error;
+
+        if (!(error instanceof ApiError) || error.status !== 409 || parsed.username?.trim()) {
+          throw error;
+        }
+
+        if (payloadMentionsEmail(error.payload)) {
+          throw error;
+        }
+      }
+    }
+
+    throw lastError instanceof Error ? lastError : new Error('Unable to create an account right now.');
   },
 
   async login(payload: LoginPayload): Promise<AuthSession> {

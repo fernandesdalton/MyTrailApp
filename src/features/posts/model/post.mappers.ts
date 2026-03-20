@@ -5,6 +5,7 @@ import {
   type TrailSummary,
   type UserSummary,
 } from '@/features/posts/model/post.types';
+import { resolveAssetUrl } from '@/shared/lib/api/asset-url';
 
 const avatarPalette = ['#C4B5FD', '#DDD6FE', '#E9D5FF', '#A78BFA', '#D8B4FE'];
 const fallbackImage =
@@ -84,6 +85,10 @@ function mapTrailSummary(trail?: TrailSummary | null) {
   };
 }
 
+function getPrimaryImageUrl(post: Pick<ApiFeedPost, 'media' | 'photos'>) {
+  return resolveAssetUrl(post.photos?.[0]?.url ?? post.media[0]?.url);
+}
+
 export function mapApiFeedPostToFeedPost(post: ApiFeedPost): FeedPost {
   const trail = mapTrailSummary(post.trail);
 
@@ -99,7 +104,7 @@ export function mapApiFeedPostToFeedPost(post: ApiFeedPost): FeedPost {
     likes: post.likesCount,
     comments: post.commentsCount,
     caption: post.caption?.trim() || 'New trail post.',
-    imageUrl: post.media[0]?.url ?? fallbackImage,
+    imageUrl: getPrimaryImageUrl(post) ?? fallbackImage,
     avatarColor: pickAvatarColor(post.author.id),
   };
 }
@@ -116,6 +121,7 @@ export function mapCreatedPostToFeedPost(
     caption: post.caption,
     createdAt: post.createdAt,
     media: post.media,
+    photos: post.photos,
     likesCount: post.likesCount,
     commentsCount: post.commentsCount,
     isLiked: false,

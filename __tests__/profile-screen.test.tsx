@@ -1,4 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { fireEvent, render } from '@testing-library/react-native';
 
@@ -19,6 +20,19 @@ const mockedUseProfileDataQuery = useProfileDataQuery as jest.Mock;
 const mockedRouter = router as unknown as {
   push: jest.Mock;
 };
+
+function renderProfileScreen(ui: React.ReactElement) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        gcTime: Infinity,
+      },
+    },
+  });
+
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+}
 
 describe('profile screen', () => {
   it('renders the signed-in user profile and opens a suggested rider profile', () => {
@@ -43,12 +57,14 @@ describe('profile screen', () => {
           avatarUrl: null,
           bio: 'Enduro and desert riding enthusiast.',
           locationLabel: 'Moab, UT',
+          followersCount: 3,
+          followingCount: 4,
+          connectionsCount: 2,
         },
         viewerUserId: '11111111-1111-4111-8111-111111111111',
         isCurrentUser: true,
         postCount: 12,
         favoriteTrailCount: 4,
-        connectionCount: 2,
         posts: [
           {
             id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
@@ -78,9 +94,11 @@ describe('profile screen', () => {
           },
         ],
       },
+      isRefetching: false,
+      refetch: jest.fn(),
     });
 
-    const { getByText, queryByText } = render(<ProfileScreen />);
+    const { getByText, queryByText } = renderProfileScreen(<ProfileScreen />);
 
     expect(getByText('alex_rider_99')).toBeTruthy();
     expect(getByText('Alex Rider')).toBeTruthy();
@@ -89,13 +107,9 @@ describe('profile screen', () => {
     expect(queryByText('Message')).toBeNull();
 
     fireEvent.press(getByText('Connect'));
-    expect(getByText('Connected')).toBeTruthy();
+    expect(queryByText('Dusty Miles')).toBeNull();
 
-    fireEvent.press(getByText('Dusty Miles'));
-    expect(mockedRouter.push).toHaveBeenCalledWith({
-      pathname: '/profile/[userId]',
-      params: { userId: '22222222-2222-4222-8222-222222222222' },
-    });
+    expect(mockedRouter.push).not.toHaveBeenCalled();
   });
 
   it('renders another rider profile, follows them, and switches to favorite trails', () => {
@@ -120,12 +134,14 @@ describe('profile screen', () => {
           avatarUrl: null,
           bio: 'Mountain dust and switchback hunting.',
           locationLabel: 'Bend, OR',
+          followersCount: 41,
+          followingCount: 11,
+          connectionsCount: 42,
         },
         viewerUserId: '11111111-1111-4111-8111-111111111111',
         isCurrentUser: false,
         postCount: 8,
         favoriteTrailCount: 3,
-        connectionCount: 42,
         posts: [
           {
             id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
@@ -146,9 +162,13 @@ describe('profile screen', () => {
         ],
         suggestedUsers: [],
       },
+      isRefetching: false,
+      refetch: jest.fn(),
     });
 
-    const { getByText } = render(<ProfileScreen userId="33333333-3333-4333-8333-333333333333" />);
+    const { getByText } = renderProfileScreen(
+      <ProfileScreen userId="33333333-3333-4333-8333-333333333333" />
+    );
 
     expect(getByText('dusty_miles')).toBeTruthy();
     expect(getByText('Connect')).toBeTruthy();

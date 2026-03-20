@@ -1,4 +1,5 @@
 import { type PostVisibility, type TrailSummary } from '@/features/posts/model/post.types';
+import { resolveAssetUrl } from '@/shared/lib/api/asset-url';
 
 export type Coordinate = {
   latitude: number;
@@ -60,6 +61,6 @@ export function mapTrailToSummary(trail: Trail): TrailSummary {
     durationSeconds: trail.durationSeconds,
     elevationGainMeters: trail.elevationGainMeters,
     regionLabel: trail.regionLabel,
-    coverImageUrl: trail.coverImageUrl,
+    coverImageUrl: resolveAssetUrl(trail.coverImageUrl),
   };
 }

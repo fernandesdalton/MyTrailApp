@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "MyTrailApp",
+    "name": "Trailgram",
     "slug": "MyTrailApp",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -28,7 +28,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Allow MyTrailApp to access your location and show where you are on the map."
+          "locationWhenInUsePermission": "Allow Trailgram to access your location and show where you are on the map."
         }
       ],
       "@rnmapbox/maps",
