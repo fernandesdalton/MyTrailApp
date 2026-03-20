@@ -9,7 +9,7 @@ import {
 } from '@/features/posts/model/post.types';
 import { postsApi } from '@/shared/lib/api/resources/posts-api';
 import { getAllTrails } from '@/shared/lib/api/resources/get-all-trails';
-import { usersApi } from '@/shared/lib/api/resources/users-api';
+import { fetchUsers } from '@/shared/lib/api/resources/users-query';
 
 type ApiUser = UserSummary & {
   bio?: string | null;
@@ -41,7 +41,7 @@ function hasRenderableMedia(post: Pick<ApiFeedPost, 'media' | 'photos'>) {
 export async function getFeedPosts({ viewerId, limit = DEFAULT_FEED_PAGE_SIZE, cursor }: FeedRequestParams) {
   const [feedPage, users, trails] = await Promise.all([
     postsApi.list<CursorPage<ApiFeedPostItem>>({ viewerId, limit, cursor }),
-    usersApi.list<ApiUser>(),
+    fetchUsers<ApiUser>(),
     getAllTrails(),
   ]);
 

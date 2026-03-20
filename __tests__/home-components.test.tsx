@@ -23,6 +23,7 @@ jest.mock('@/features/home/queries/use-feed-posts-query', () => ({
               userName: 'Jake',
               handle: '@jake',
               postedAt: 'now',
+              hasTrail: true,
               trailName: 'Dusty Loop',
               distance: '10 km',
               duration: '1h',
@@ -71,6 +72,7 @@ const samplePost: FeedPost = {
   userName: 'Jake',
   handle: '@jake',
   postedAt: '2h ago',
+  hasTrail: true,
   trailName: 'Dusty Loop',
   distance: '12 mi',
   duration: '4h',
@@ -115,6 +117,26 @@ describe('home components and screen', () => {
     expect(getAllByText('Jake').length).toBeGreaterThan(0);
     expect(getByText('Dusty Loop')).toBeTruthy();
     expect(getByText('Route')).toBeTruthy();
+  });
+
+  it('hides trail content when a post has no linked trail', () => {
+    const { getByText, queryByText } = render(
+      <FeedPostCard
+        post={{
+          ...samplePost,
+          hasTrail: false,
+          trailName: 'OPEN TRAIL',
+          distance: 'No trail',
+          duration: 'Add route',
+          elevation: '0 m',
+        }}
+      />
+    );
+
+    expect(getByText('Great ride')).toBeTruthy();
+    expect(queryByText('OPEN TRAIL')).toBeNull();
+    expect(queryByText('Route')).toBeNull();
+    expect(queryByText('DISTANCE')).toBeNull();
   });
 
   it('renders shared map notice card', () => {

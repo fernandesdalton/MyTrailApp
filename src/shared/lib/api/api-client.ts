@@ -19,6 +19,32 @@ export class ApiError extends Error {
   }
 }
 
+function extractApiErrorMessage(payload: unknown, status: number) {
+  if (typeof payload === 'string') {
+    const trimmed = payload.trim();
+    if (trimmed) {
+      return trimmed;
+    }
+  }
+
+  if (payload && typeof payload === 'object') {
+    const candidateKeys = ['detail', 'message', 'error'] as const;
+
+    for (const key of candidateKeys) {
+      const value = payload[key];
+      if (typeof value === 'string' && value.trim()) {
+        return value.trim();
+      }
+    }
+  }
+
+  if (status === 409) {
+    return 'That account information is already in use.';
+  }
+
+  return `Request failed with status ${status}`;
+}
+
 export function buildQueryString(query?: Record<string, string | number | boolean | null | undefined>) {
   if (!query) {
     return '';
@@ -94,7 +120,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   const payload = isJson ? await response.json() : await response.text();
 
   if (!response.ok) {
-    throw new ApiError(`Request failed with status ${response.status}`, response.status, url, payload);
+    throw new ApiError(extractApiErrorMessage(payload, response.status), response.status, url, payload);
   }
 
   return payload as T;

@@ -215,19 +215,35 @@ export function ProfileScreen({ userId }: ProfileScreenProps) {
           {activeSection === 'posts' ? (
             <View style={styles.grid}>
               {(data?.posts ?? []).map((post) => (
-                <View key={post.id} style={styles.gridTile}>
+                <Pressable
+                  key={post.id}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/post/[postId]',
+                      params: { postId: post.id },
+                    })
+                  }
+                  style={styles.gridTile}>
                   <Image
                     source={post.imageUrl || fallbackTileImage}
                     style={styles.gridImage}
                     contentFit="cover"
                   />
-                </View>
+                </Pressable>
               ))}
             </View>
           ) : (
             <View style={styles.favoriteList}>
               {(data?.favoriteTrails ?? []).map((trail) => (
-                <View key={trail.id} style={styles.favoriteCard}>
+                <Pressable
+                  key={trail.id}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/trail/[trailId]',
+                      params: { trailId: trail.id },
+                    })
+                  }
+                  style={styles.favoriteCard}>
                   <Image
                     source={trail.coverImageUrl ?? fallbackTrailImage}
                     style={styles.favoriteImage}
@@ -244,7 +260,7 @@ export function ProfileScreen({ userId }: ProfileScreenProps) {
                       <AppText style={styles.favoriteRegion}>{trail.regionLabel}</AppText>
                     ) : null}
                   </View>
-                </View>
+                </Pressable>
               ))}
             </View>
           )}

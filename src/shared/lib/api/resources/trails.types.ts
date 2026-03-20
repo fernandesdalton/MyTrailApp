@@ -6,6 +6,12 @@ export type Coordinate = {
   longitude: number;
 };
 
+export type CursorPage<T> = {
+  items: T[];
+  nextCursor: string | null;
+  hasMore: boolean;
+};
+
 export type Trail = {
   id: string;
   ownerId: string;

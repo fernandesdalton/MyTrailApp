@@ -95,6 +95,21 @@ describe('api-client', () => {
     await expect(apiRequest('/boom')).rejects.toBeInstanceOf(ApiError);
   });
 
+  it('uses backend error detail when available', async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 409,
+      headers: { get: () => 'application/json' },
+      json: async () => ({ detail: 'Username already exists' }),
+      text: async () => '',
+    });
+
+    await expect(apiRequest('/auth/register')).rejects.toMatchObject({
+      message: 'Username already exists',
+      status: 409,
+    });
+  });
+
   it('attaches bearer auth when a session token is cached', async () => {
     fetchMock.mockResolvedValue({
       ok: true,

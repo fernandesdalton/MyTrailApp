@@ -50,26 +50,28 @@ export const FeedPostCard = memo(function FeedPostCard({ post }: { post: FeedPos
 
       <View style={styles.mediaFrame}>
         <Image source={post.imageUrl} style={styles.image} contentFit="cover" transition={150} />
-        <View style={styles.overlay}>
-          <View style={styles.trailPill}>
-            <AppText style={styles.trailPillText}>{post.trailName}</AppText>
-          </View>
+        {post.hasTrail ? (
+          <View style={styles.overlay}>
+            <View style={styles.trailPill}>
+              <AppText style={styles.trailPillText}>{post.trailName}</AppText>
+            </View>
 
-          <View style={styles.statBar}>
-            <View style={styles.stat}>
-              <AppText style={styles.statLabel}>DISTANCE</AppText>
-              <AppText style={styles.statValue}>{post.distance}</AppText>
-            </View>
-            <View style={styles.stat}>
-              <AppText style={styles.statLabel}>DURATION</AppText>
-              <AppText style={styles.statValue}>{post.duration}</AppText>
-            </View>
-            <View style={styles.stat}>
-              <AppText style={styles.statLabel}>ELEV GAIN</AppText>
-              <AppText style={styles.statValue}>{post.elevation}</AppText>
+            <View style={styles.statBar}>
+              <View style={styles.stat}>
+                <AppText style={styles.statLabel}>DISTANCE</AppText>
+                <AppText style={styles.statValue}>{post.distance}</AppText>
+              </View>
+              <View style={styles.stat}>
+                <AppText style={styles.statLabel}>DURATION</AppText>
+                <AppText style={styles.statValue}>{post.duration}</AppText>
+              </View>
+              <View style={styles.stat}>
+                <AppText style={styles.statLabel}>ELEV GAIN</AppText>
+                <AppText style={styles.statValue}>{post.elevation}</AppText>
+              </View>
             </View>
           </View>
-        </View>
+        ) : null}
       </View>
 
       <View style={styles.footer}>
@@ -86,14 +88,16 @@ export const FeedPostCard = memo(function FeedPostCard({ post }: { post: FeedPos
               web: 'chat_bubble_outline',
             }}
           />
-          <Pressable style={styles.routeButton}>
-            <SymbolView
-              name={{ ios: 'paperplane', android: 'near_me', web: 'near_me' }}
-              tintColor={colors.accent}
-              size={17}
-            />
-            <AppText style={styles.routeButtonText}>Route</AppText>
-          </Pressable>
+          {post.hasTrail ? (
+            <Pressable style={styles.routeButton}>
+              <SymbolView
+                name={{ ios: 'paperplane', android: 'near_me', web: 'near_me' }}
+                tintColor={colors.accent}
+                size={17}
+              />
+              <AppText style={styles.routeButtonText}>Route</AppText>
+            </Pressable>
+          ) : null}
         </View>
 
         <View style={styles.captionBlock}>

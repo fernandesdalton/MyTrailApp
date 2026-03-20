@@ -5,12 +5,17 @@ import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { authApi } from '@/features/auth/api/auth-api';
 import { useAuthSession } from '@/features/auth/hooks/use-auth-session';
 import { AuthScreen } from '@/features/auth/screens/auth-screen';
-import { apiGet, apiPost } from '@/shared/lib/api/api-client';
+import { ApiError, apiGet, apiPost } from '@/shared/lib/api/api-client';
 
-jest.mock('@/shared/lib/api/api-client', () => ({
-  apiGet: jest.fn(),
-  apiPost: jest.fn(),
-}));
+jest.mock('@/shared/lib/api/api-client', () => {
+  const actual = jest.requireActual('@/shared/lib/api/api-client');
+
+  return {
+    ...actual,
+    apiGet: jest.fn(),
+    apiPost: jest.fn(),
+  };
+});
 
 jest.mock('@/features/auth/hooks/use-auth-session', () => ({
   useAuthSession: jest.fn(),
@@ -95,6 +100,58 @@ describe('auth api and screens', () => {
       }
     );
     expect(loggedInSession.accessToken).toBe('login_token');
+  });
+
+  it('retries registration with a fallback username after a 409 conflict', async () => {
+    mockedApiPost
+      .mockRejectedValueOnce(
+        new ApiError('Username already exists', 409, '/auth/register', {
+          detail: 'Username already exists',
+        }) as never
+      )
+      .mockResolvedValueOnce({
+        accessToken: 'register_token',
+        tokenType: 'bearer',
+        expiresAt: '2026-03-19T12:00:00Z',
+        user: {
+          id: '11111111-1111-4111-8111-111111111111',
+          username: 'alex_1234',
+          displayName: 'Alex Rider',
+          bio: null,
+          avatarUrl: null,
+          locationLabel: null,
+          createdAt: '2026-03-19T11:00:00Z',
+          updatedAt: '2026-03-19T11:00:00Z',
+        },
+      } as never);
+
+    const registeredSession = await authApi.register({
+      displayName: 'Alex Rider',
+      email: 'alex@trailblazer.app',
+      password: 'supersecure',
+    });
+
+    expect(mockedApiPost).toHaveBeenNthCalledWith(
+      1,
+      '/auth/register',
+      expect.objectContaining({
+        username: 'alex',
+        displayName: 'Alex Rider',
+        email: 'alex@trailblazer.app',
+        password: 'supersecure',
+      })
+    );
+    expect(mockedApiPost).toHaveBeenNthCalledWith(
+      2,
+      '/auth/register',
+      expect.objectContaining({
+        username: expect.stringMatching(/^alex(_rider|_\d{4})$/),
+        displayName: 'Alex Rider',
+        email: 'alex@trailblazer.app',
+        password: 'supersecure',
+      })
+    );
+    expect(registeredSession.user.username).toBe('alex_1234');
   });
 
   it('hydrates the current user and logs out through backend auth endpoints', async () => {

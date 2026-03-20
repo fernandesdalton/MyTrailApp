@@ -6,7 +6,7 @@ import {
   type ProfileUser,
 } from '@/features/profile/model/profile.types';
 import { resolveAssetUrl } from '@/shared/lib/api/asset-url';
-import { mapTrailToSummary, type Trail } from '@/shared/lib/api/resources';
+import { getAllSavedTrailSummaries, getAllUserTrailSummaries } from '@/shared/lib/api/resources/trail-pages';
 import { usersApi } from '@/shared/lib/api/resources/users-api';
 
 type ApiUser = {
@@ -44,11 +44,12 @@ export async function getProfileData(profileUserId?: string): Promise<ProfileDat
 
   const targetUserId = profileUserId ?? sessionUser.id;
 
-  const [users, profileUser, posts, relatedTrails] = await Promise.all([
+  const [users, profileUser, posts, relatedTrails, savedTrails] = await Promise.all([
     usersApi.list<ApiUser>().catch(() => []),
     usersApi.getById<ApiUser>(targetUserId).catch(() => null),
     usersApi.listPosts<ApiPost>(targetUserId).catch(() => []),
-    usersApi.listTrails<Trail>(targetUserId).then((items) => items.map(mapTrailToSummary)).catch(() => []),
+    getAllUserTrailSummaries(targetUserId).catch(() => []),
+    getAllSavedTrailSummaries(targetUserId).catch(() => []),
   ]);
 
   const selectedUser =
@@ -73,7 +74,7 @@ export async function getProfileData(profileUserId?: string): Promise<ProfileDat
     .map(mapApiUserToProfileUser)
     .slice(0, 6);
 
-  const favoriteTrails = relatedTrails;
+  const favoriteTrails = savedTrails;
 
   return {
     profileUser: resolvedProfileUser,

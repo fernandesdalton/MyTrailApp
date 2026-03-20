@@ -3,6 +3,7 @@ export type FeedPost = {
   userName: string;
   handle: string;
   postedAt: string;
+  hasTrail: boolean;
   trailName: string;
   distance: string;
   duration: string;

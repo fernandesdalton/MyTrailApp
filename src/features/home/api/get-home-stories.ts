@@ -1,7 +1,7 @@
 import { type HomeStory } from '@/features/home/model/story.types';
 import { storiesApi } from '@/shared/lib/api/resources/stories-api';
-import { usersApi } from '@/shared/lib/api/resources/users-api';
 import { type CursorPage } from '@/features/home/api/get-feed-posts';
+import { fetchUsers } from '@/shared/lib/api/resources/users-query';
 
 type ApiStory = {
   id: string;
@@ -39,7 +39,7 @@ export async function getHomeStories({
 }: StoryRequestParams) {
   const [storiesPage, users] = await Promise.all([
     storiesApi.list<CursorPage<ApiStory>>({ viewerId, limit, cursor }),
-    usersApi.list<ApiUser>(),
+    fetchUsers<ApiUser>(),
   ]);
 
   const usersById = new Map(users.map((user) => [user.id, user]));

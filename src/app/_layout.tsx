@@ -10,6 +10,9 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="new-post" />
+        <Stack.Screen name="post/[postId]" />
+        <Stack.Screen name="saved-trails" />
+        <Stack.Screen name="trail/[trailId]" />
       </Stack>
     </AppProviders>
   );

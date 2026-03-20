@@ -1,7 +1,7 @@
 import { getCachedSession } from '@/features/auth/lib/auth-session';
 import { type UserSummary } from '@/features/posts/model/post.types';
 import { getAllTrails } from '@/shared/lib/api/resources/get-all-trails';
-import { mapTrailToSummary, type Trail } from '@/shared/lib/api/resources';
+import { getAllSavedTrailSummaries } from '@/shared/lib/api/resources/trail-pages';
 import { usersApi } from '@/shared/lib/api/resources/users-api';
 
 type ApiUser = UserSummary & {
@@ -18,7 +18,7 @@ export async function getPostComposerData() {
 
   const [allTrails, favoriteTrails, backendUser] = await Promise.all([
     getAllTrails(),
-    usersApi.listTrails<Trail>(sessionUser.id).then((items) => items.map(mapTrailToSummary)),
+    getAllSavedTrailSummaries(sessionUser.id),
     usersApi.getById<ApiUser>(sessionUser.id).catch(() => null),
   ]);
 

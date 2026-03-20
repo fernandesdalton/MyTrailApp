@@ -13,6 +13,12 @@ export const trailsScreenStyles = StyleSheet.create({
     paddingBottom: 28,
     gap: 16,
   },
+  listHeader: {
+    gap: 16,
+  },
+  listSpacer: {
+    height: 14,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -55,6 +61,24 @@ export const trailsScreenStyles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 10,
     lineHeight: 12,
+    fontWeight: '800',
+  },
+  headerActions: {
+    alignItems: 'flex-end',
+    gap: 8,
+  },
+  savedButton: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    backgroundColor: colors.accentSoft,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  savedButtonLabel: {
+    color: colors.accent,
+    fontSize: 11,
+    lineHeight: 14,
     fontWeight: '800',
   },
   rangeCard: {
@@ -150,35 +174,40 @@ export const trailsScreenStyles = StyleSheet.create({
     lineHeight: 12,
     fontWeight: '800',
   },
-  actionColumn: {
-    gap: 8,
-  },
-  actionButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+  saveButton: {
+    minWidth: 72,
+    height: 34,
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(17, 13, 9, 0.82)',
     borderWidth: 1,
     borderColor: '#4B3A2C',
   },
-  actionButtonActive: {
+  saveButtonActive: {
     backgroundColor: colors.accent,
     borderColor: colors.accent,
   },
-  actionLabel: {
+  saveButtonPending: {
+    opacity: 0.72,
+  },
+  saveButtonLabel: {
     color: colors.text,
-    fontSize: 14,
-    lineHeight: 14,
+    fontSize: 11,
+    lineHeight: 12,
     fontWeight: '800',
   },
-  actionLabelActive: {
+  saveButtonLabelActive: {
     color: '#130A25',
   },
   trailBottom: {
     gap: 4,
     marginTop: 'auto',
+  },
+  trailActionBar: {
+    paddingHorizontal: 14,
+    paddingTop: 12,
+    backgroundColor: '#13100D',
   },
   trailTitle: {
     color: '#FFF4E9',
@@ -234,5 +263,16 @@ export const trailsScreenStyles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 12,
     lineHeight: 17,
+  },
+  retryButton: {
+    alignSelf: 'flex-start',
+    borderRadius: 999,
+    backgroundColor: colors.accent,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  retryButtonLabel: {
+    color: '#130A25',
+    fontWeight: '800',
   },
 });

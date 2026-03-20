@@ -252,6 +252,7 @@ describe('post creation', () => {
     );
 
     expect(feedPost.handle).toBe('@dusty');
+    expect(feedPost.hasTrail).toBe(true);
     expect(feedPost.trailName).toBe('RIDGE LINE');
     expect(createdPost.imageUrl).toBe('https://example.com/created.jpg');
     expect(createdPost.likes).toBe(0);

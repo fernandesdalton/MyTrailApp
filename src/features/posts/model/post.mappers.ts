@@ -97,6 +97,7 @@ export function mapApiFeedPostToFeedPost(post: ApiFeedPost): FeedPost {
     userName: post.author.displayName,
     handle: `@${post.author.username}`,
     postedAt: formatPostedAt(post.createdAt),
+    hasTrail: Boolean(post.trail),
     trailName: trail.trailName,
     distance: trail.distance,
     duration: trail.duration,

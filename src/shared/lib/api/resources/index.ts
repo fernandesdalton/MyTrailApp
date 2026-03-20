@@ -5,6 +5,7 @@ export { storiesApi } from '@/shared/lib/api/resources/stories-api';
 export { trailsApi } from '@/shared/lib/api/resources/trails-api';
 export type {
   Coordinate,
+  CursorPage,
   SavedTrailResponse,
   Trail,
   TrailCreatePayload,
